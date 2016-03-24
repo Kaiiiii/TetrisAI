@@ -1,5 +1,9 @@
 package logic;
 
+import entities.Debugger;
+import entities.Tetromino;
+import entities.TetrominoFactory;
+
 import java.util.stream.IntStream;
 
 /**
@@ -27,7 +31,9 @@ public class FieldAnalyzer {
 
     public Analysis analyze(Game game, Game.Action action) {
         this.copyFieldFrom(game);
-        boolean[][] blockBitmap = game.getNextPieceBitmap();
+
+        Tetromino model = new Tetromino(game.getNextPiece().getType(), action.getRotation());
+        boolean[][] blockBitmap = TetrominoFactory.getInstance().getBitmap(model);
 
         // Find the row to place
         int row = -1;
@@ -60,14 +66,9 @@ public class FieldAnalyzer {
         }
 
         // Copy data over
-        IntStream.range(0, field.length)
-                .forEach(row -> {
-                        System.arraycopy(
-                                field[row], 0,
-                                this._workingArea[row], 0,
-                                game.getField().getWidth()
-                        );
-                });
+        for (int row = 0; row < this._workingArea.length; row++) {
+            System.arraycopy(field[row], 0, this._workingArea[row], 0, this._workingArea[0].length);
+        }
     }
 
     private boolean canPut(boolean[][] block, int row, int col) {

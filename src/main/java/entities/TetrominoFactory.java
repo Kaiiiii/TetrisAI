@@ -10,6 +10,12 @@ import java.util.stream.IntStream;
  */
 public class TetrominoFactory {
 
+    private static TetrominoFactory instance = new TetrominoFactory();
+
+    public static TetrominoFactory getInstance() {
+        return instance;
+    }
+
     /**
      * Properties
      */
@@ -18,7 +24,7 @@ public class TetrominoFactory {
     /**
      * Constructs a TetrominoFactory with a new cache for tetris blocks
      */
-    public TetrominoFactory() {
+    private TetrominoFactory() {
         this._cacheMap = new HashMap<>();
     }
 

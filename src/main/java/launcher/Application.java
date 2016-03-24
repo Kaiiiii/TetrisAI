@@ -1,4 +1,4 @@
-package main;
+package launcher;
 
 import ai.UniversalPlayer;
 import logic.Player;
@@ -21,5 +21,10 @@ public class Application extends VisualPlayer {
     @Override
     protected Player getAI() {
         return new UniversalPlayer();
+    }
+
+    @Override
+    protected int getAiDelay() {
+        return 10;
     }
 }

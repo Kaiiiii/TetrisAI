@@ -1,6 +1,6 @@
 package ui;
 
-import ai.MinimizeRoughnessPlayer;
+import entities.TetrominoFactory;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.VPos;
@@ -12,7 +12,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.util.Pair;
-import logic.*;
+import logic.Game;
+import logic.Player;
 
 import java.util.stream.IntStream;
 
@@ -48,7 +49,6 @@ public class ViewController implements Runnable {
     };
     private static final Color COLOR_STROKE_BORDER_FIELD = Color.rgb(0,0,0);
 
-    private static final int DELAY_PUT_PIECE = 150;
     private static final int DELAY_TERMINATION = 2000;
 
     private double _drawOriginX;
@@ -62,6 +62,7 @@ public class ViewController implements Runnable {
     private int _diffCounter = 0;
 
     private Stage _primaryStage;
+    private Integer _aiDelay;
 
     /**
      * Properties
@@ -180,7 +181,7 @@ public class ViewController implements Runnable {
         assert this._game.isOngoing();
         assert this._game.getNextPiece() != null;
 
-        boolean[][] blockBitmap = this._game.getNextPieceBitmap();
+        boolean[][] blockBitmap = TetrominoFactory.getInstance().getBitmap(this._game.getNextPiece());
         int blockId = this._game.getNextPieceIdentifier();
 
         double previewWidth = blockBitmap[0].length * SIZE_CELL;
@@ -276,6 +277,8 @@ public class ViewController implements Runnable {
 
     @Override
     public void run() {
+        assert this._aiDelay != null;
+
         if (this._game.isOngoing() && this._game.getNextPiece() != null) {
             this.renderGameState();
 
@@ -289,7 +292,7 @@ public class ViewController implements Runnable {
                 this._game.performAction(this._player.getNextMove(this._game));
 
                 try {
-                    Thread.sleep(DELAY_PUT_PIECE);
+                    Thread.sleep(this._aiDelay);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -325,5 +328,9 @@ public class ViewController implements Runnable {
     private boolean isDiffing() {
         this._diffCounter = (this._diffCounter + 1) % THRESHOLD_DIFFING;
         return this._diffCounter == 0;
+    }
+
+    public void setDelay(int delay) {
+        this._aiDelay = delay;
     }
 }

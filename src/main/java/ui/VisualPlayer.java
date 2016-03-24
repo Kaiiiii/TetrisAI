@@ -15,7 +15,8 @@ public abstract class VisualPlayer extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(this.getClass().getResource("../ui/Tetris.fxml"));
+        ClassLoader classLoader = this.getClass().getClassLoader();
+        FXMLLoader loader = new FXMLLoader(classLoader.getResource("Tetris.fxml"));
         Parent root = loader.load();
         this._controller = loader.getController();
         Scene scene = new Scene(root);
@@ -38,10 +39,12 @@ public abstract class VisualPlayer extends Application {
         if (this.letHumanPlay()) {
             this._controller.letHumanPlay(this._primaryStage);
         } else {
+            this._controller.setDelay(this.getAiDelay());
             this._controller.letAiPlay(this.getAI(), this._primaryStage);
         }
     }
 
     protected abstract boolean letHumanPlay();
     protected abstract Player getAI();
+    protected abstract int getAiDelay();
 }

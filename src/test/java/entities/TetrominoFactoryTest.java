@@ -11,12 +11,7 @@ import static org.junit.Assert.assertThat;
  */
 public class TetrominoFactoryTest {
 
-    private static TetrominoFactory factory;
-
-    @BeforeClass
-    public static void setUp() {
-        factory = new TetrominoFactory();
-    }
+    private static TetrominoFactory factory = TetrominoFactory.getInstance();
 
     @Test
     public void Tetromino_factory_generates_default_O_block_correctly() {

@@ -87,7 +87,7 @@ public class FieldTest {
         exceptions.add(new Pair<>(Tetromino.Type.L, Tetromino.Type.O));
 
 
-        TetrominoFactory factory = new TetrominoFactory();
+        TetrominoFactory factory = TetrominoFactory.getInstance();
 
         List<Tetromino> firstPieces = new ArrayList<>();
         List<Tetromino> secondPieces = new ArrayList<>();

@@ -10,7 +10,6 @@ import java.util.stream.IntStream;
  */
 public class Game {
 
-    private TetrominoFactory _factory;
     private Field _field;
     private Tetromino _nextPiece;
     private boolean _isOngoing;
@@ -18,7 +17,6 @@ public class Game {
     private int _currentScore;
 
     public Game() {
-        this._factory = new TetrominoFactory();
         this._field = new Field();
         this._isOngoing = false;
         this._currentTurn = 0;
@@ -46,7 +44,7 @@ public class Game {
         assert piece != null;
         piece.setRotation(action.getRotation());
 
-        boolean[][] bitmap = this._factory.getBitmap(piece);
+        boolean[][] bitmap = TetrominoFactory.getInstance().getBitmap(piece);
         assert action.getPosition() <= this._field.getWidth() - bitmap[0].length;
 
         int result = this._field.put(action.getPosition(), bitmap, piece.getBlockId());
@@ -84,11 +82,6 @@ public class Game {
         return this._nextPiece;
     }
 
-    public boolean[][] getNextPieceBitmap() {
-        assert this.getNextPiece() != null;
-        return this._factory.getBitmap(this.getNextPiece());
-    }
-
     public int getNextPieceIdentifier() {
         assert this.getNextPiece() != null;
         return this.getNextPiece().getBlockId();
@@ -108,7 +101,7 @@ public class Game {
 
     public int[] getAvailablePositionsFor(Tetromino.Rotation rotation) {
         Tetromino model = new Tetromino(this.getNextPiece().getType(), rotation);
-        int width = this._factory.getBitmap(model)[0].length;
+        int width = TetrominoFactory.getInstance().getBitmap(model)[0].length;
         return IntStream.range(0, this.getField().getWidth() - width + 1).toArray();
     }
 
@@ -155,5 +148,9 @@ public class Game {
 
         public Tetromino.Rotation getRotation() { return this._rotation; }
         public int getPosition() { return this._position; }
+
+        @Override public String toString() {
+            return String.format("[Rotation: %s\tposition: %s]", this.getRotation(), this.getPosition());
+        }
     }
 }
