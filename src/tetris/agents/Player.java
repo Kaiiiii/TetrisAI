@@ -7,26 +7,55 @@ import tetris.model.TFrame;
 
 public class Player {
 
+    //pieces ordering from State = O I L J T S Z
     //implement this function to have a working system
     public int pickMove(State s, int[][] legalMoves) {
-	//hPoints - points allocated to height for each legalMoves
-	int[] hPoints = calHeightPoints(s, legalMoves);
+	//heightPoints - points allocated to height for each legalMoves
+	int[] heightPoints = calHeightPoints(s, legalMoves);
+	int[] holePoints = calHolePoints(s, legalMoves);
 	int result = 0;
 	for (int i=1; i<legalMoves.length; i++) {
-	    if (hPoints[result]>=hPoints[i]){
+	    int resultPoint = heightPoints[result] + holePoints[result];
+	    int checkPoint = heightPoints[i] + holePoints[i];
+	    if (resultPoint>=checkPoint){
 		result = i;
 	    }
 	}
-	int nextPiece = s.getNextPiece();
-	String[] piece = {"O", "I", "L", "J", "T", "S", "Z"};
-	//System.out.println("Piece: "+piece[nextPiece]+" Results: "+result+" "+legalMoves[result][0]+" "+legalMoves[result][1]);
 
 	return result;
     }
 
+    //calculate the points from resulted holes in each affected column.
+    //return the resulted holes after move. lower the better.
+    public int[] calHolePoints(State s, int[][] legalMoves) {    
+	int nextPiece = s.getNextPiece();
+	int[] points = new int[legalMoves.length];
+	int[] boardHeights = s.getTop();
+	int[][] allWidth = s.getpWidth();
+	int[][][] pTop = s.getpTop();
+	int[][][] pBottom = s.getpBottom();
+	for (int i=0;i<legalMoves.length;i++){
+	    int pOrient = legalMoves[i][0];
+	    int pSlot = legalMoves[i][1];
+	    int pWidth = allWidth[nextPiece][pOrient];
+	    int[] temp = new int[pWidth];
+	    for (int j=0;j<pWidth;j++) {
+		temp[j]=boardHeights[j+pSlot];
+	    }
+
+	    int maxBottom = getpBottom(nextPiece, pBottom, pOrient, pWidth);
+	    addBottomHalf(nextPiece, pBottom, pOrient, pWidth, temp, maxBottom);
+	    int tempMax = getTempMax(pWidth, temp);
+
+	    for (int k=0;k<pWidth;k++){
+		points[i] += Math.abs(temp[k]-tempMax);
+	    }
+	}
+	return points;
+    }
+
     //calculate the points from the height in each affected column.
     //return the increased in height after move. lower the better.
-    //pieces ordering from State = O I L J T S Z
     public int[] calHeightPoints(State s, int[][] legalMoves) {
 	int nextPiece = s.getNextPiece();
 	int[] points = new int[legalMoves.length];
@@ -97,7 +126,7 @@ public class Player {
 	}
     }
 
-    //check all pBottom of piece in orientation	
+    //check all pBottom of piece in orientation 
     public int getpBottom(int nextPiece, int[][][] pBottom, int pOrient, int pWidth) {
 	int maxBottom= 0;
 	for (int k=0;k<pWidth;k++) {
