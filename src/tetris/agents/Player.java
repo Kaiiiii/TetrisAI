@@ -35,7 +35,6 @@ public class Player {
 	int[][][] pTop = s.getpTop();
 	int[][][] pBottom = s.getpBottom();
 	for (int i=0;i<legalMoves.length;i++){
-	    int newHeight = 0;
 	    int pOrient = legalMoves[i][0];
 	    int pSlot = legalMoves[i][1];
 	    int pWidth = allWidth[nextPiece][pOrient];
@@ -44,39 +43,67 @@ public class Player {
 		temp[j]=boardHeights[j+pSlot];
 	    }
 
-	    //check all pBottom of piece in orientation
-	    int maxBottom= 0;
-	    for (int k=0;k<pWidth;k++) {
-		maxBottom = Math.max(maxBottom, pBottom[nextPiece][pOrient][k]);
-	    }
-	    //add the bottom part of piece
-	    for (int a=0;a<pWidth;a++) {
-		if (pBottom[nextPiece][pOrient][a]==0) {
-		    temp[a]+=maxBottom;
-		}
-	    }
-	    //compare all temp heights
-	    int tempMax = 0;
-	    for (int l=0;l<pWidth;l++) {
-		if (temp[l]>tempMax){
-		    tempMax = temp[l];
-		}
-	    }
-	    //set all temp as the max
-	    for (int m=0; m<pWidth; m++){
-		temp[m]=tempMax;
-	    }
-	    //add the top part of piece
-	    for (int n=0;n<pWidth;n++) {
-		temp[n]+=pTop[nextPiece][pOrient][n]-maxBottom;
-	    }
-	    //sum of temp = newHeight
-	    for (int o=0;o<pWidth;o++) {
-		newHeight+=temp[o];
-	    }
-	    points[i] = newHeight;
+	    int maxBottom = getpBottom(nextPiece, pBottom, pOrient, pWidth);
+	    addBottomHalf(nextPiece, pBottom, pOrient, pWidth, temp, maxBottom);
+	    int tempMax = getTempMax(pWidth, temp);
+	    setAllTempMax(pWidth, temp, tempMax);
+	    addTopHalf(nextPiece, pTop, pOrient, pWidth, temp, maxBottom);
+	    points[i] = sumForPoint(pWidth, temp);
 	}
 	return points;
+    }
+
+    //sum of temp = newHeight
+    public int sumForPoint(int pWidth, int[] temp) {
+	int newHeight = 0;
+	for (int o=0;o<pWidth;o++) {
+	    newHeight+=temp[o];
+	}
+	return newHeight;
+    }
+
+    //add the top part of piece
+    public void addTopHalf(int nextPiece, int[][][] pTop, int pOrient, int pWidth, int[] temp, int maxBottom) {
+	for (int n=0;n<pWidth;n++) {
+	    temp[n]+=pTop[nextPiece][pOrient][n]-maxBottom;
+	}
+    }
+
+    //set all temp as the max
+    public void setAllTempMax(int pWidth, int[] temp, int tempMax) {
+	for (int m=0; m<pWidth; m++){
+	    temp[m]=tempMax;
+	}
+    }
+
+    //compare all temp heights
+    public int getTempMax(int pWidth, int[] temp) {
+	int tempMax = 0;
+	for (int l=0;l<pWidth;l++) {
+	    if (temp[l]>tempMax){
+		tempMax = temp[l];
+	    }
+	}
+	return tempMax;
+    }
+
+    //add the bottom part of piece
+    public void addBottomHalf(int nextPiece, int[][][] pBottom, int pOrient, int pWidth, int[] temp, int maxBottom) {
+
+	for (int a=0;a<pWidth;a++) {
+	    if (pBottom[nextPiece][pOrient][a]==0) {
+		temp[a]+=maxBottom;
+	    }
+	}
+    }
+
+    //check all pBottom of piece in orientation	
+    public int getpBottom(int nextPiece, int[][][] pBottom, int pOrient, int pWidth) {
+	int maxBottom= 0;
+	for (int k=0;k<pWidth;k++) {
+	    maxBottom = Math.max(maxBottom, pBottom[nextPiece][pOrient][k]);
+	}
+	return maxBottom;
     }
 
 
