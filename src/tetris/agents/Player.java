@@ -13,13 +13,13 @@ public class Player {
 	int[] hPoints = calHeightPoints(s, legalMoves);
 	int result = 0;
 	for (int i=1; i<legalMoves.length; i++) {
-	    if (hPoints[result]>hPoints[i]){
+	    if (hPoints[result]>=hPoints[i]){
 		result = i;
 	    }
 	}
 	int nextPiece = s.getNextPiece();
 	String[] piece = {"O", "I", "L", "J", "T", "S", "Z"};
-	//	    System.out.println("Piece: "+piece[nextPiece]+" Results: "+result+" "+legalMoves[result][0]+" "+legalMoves[result][1]);
+	//System.out.println("Piece: "+piece[nextPiece]+" Results: "+result+" "+legalMoves[result][0]+" "+legalMoves[result][1]);
 
 	return result;
     }
@@ -95,7 +95,7 @@ public class Player {
 	    s.draw();
 	    s.drawNext(0,0);
 	    try {
-		Thread.sleep(300);
+		Thread.sleep(3);
 	    } catch (InterruptedException e) {
 		e.printStackTrace();
 	    }
