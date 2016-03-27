@@ -8,5 +8,6 @@
 	<lib name="junit:junit:4.12" scope="TEST"/>
 	<levels>
 		<level name="junit:junit:4.12" value="project"/>
+		<level name="org.apache.directory.studio:org.apache.commons.io:2.4" value="project"/>
 	</levels>
 </component>

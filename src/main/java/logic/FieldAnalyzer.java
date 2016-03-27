@@ -1,10 +1,7 @@
 package logic;
 
-import entities.Debugger;
 import entities.Tetromino;
 import entities.TetrominoFactory;
-
-import java.util.stream.IntStream;
 
 /**
  * Created by maianhvu on 24/03/2016.

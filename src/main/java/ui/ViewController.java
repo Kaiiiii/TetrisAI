@@ -291,11 +291,14 @@ public class ViewController implements Runnable {
                 // Action valid, game is still going on
                 this._game.performAction(this._player.getNextMove(this._game));
 
-                try {
-                    Thread.sleep(this._aiDelay);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                if (this._aiDelay != 0) {
+                    try {
+                        Thread.sleep(this._aiDelay);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
+
                 Platform.runLater(this);
             }
         }

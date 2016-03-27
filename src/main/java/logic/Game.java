@@ -96,7 +96,7 @@ public class Game {
     }
 
     private static Tetromino generateNextPiece() {
-        return Tetromino.randomPiece();
+        return TetrominoFactory.getInstance().randomPiece();
     }
 
     public int[] getAvailablePositionsFor(Tetromino.Rotation rotation) {

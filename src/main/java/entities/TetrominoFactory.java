@@ -2,6 +2,7 @@ package entities;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -20,6 +21,7 @@ public class TetrominoFactory {
      * Properties
      */
     private HashMap<Tetromino, boolean[][]> _cacheMap;
+    private final Random _randomizer = new Random();
 
     /**
      * Constructs a TetrominoFactory with a new cache for tetris blocks
@@ -141,4 +143,10 @@ public class TetrominoFactory {
         });
         System.out.print(builder);
     }
+
+    public Tetromino randomPiece() {
+        Tetromino.Type type = Tetromino.Type.values()[this._randomizer.nextInt(Tetromino.Type.values().length)];
+        return new Tetromino(type);
+    }
+
 }

@@ -106,12 +106,6 @@ public class Tetromino {
 
     public int getBlockId() { return this._type.ordinal() + 1; }
 
-    public static Tetromino randomPiece() {
-        Random random = new Random();
-        Type type = Type.values()[random.nextInt(Type.values().length)];
-        return new Tetromino(type);
-    }
-
     public Rotation[] getUsefulRotations() {
         switch (this._type) {
             case O:
