@@ -14,7 +14,7 @@ public abstract class HeuristicsPlayer implements Player {
                 game.getNextPiece().getUsefulRotations();
 
         Game.Action desiredAction = null;
-        Integer heuristicOutput = null;
+        Double heuristicOutput = null;
         FieldAnalyzer analyzer = new FieldAnalyzer();
 
         for (Tetromino.Rotation rotation : meaningfulRotations) {
@@ -29,7 +29,7 @@ public abstract class HeuristicsPlayer implements Player {
                 if (result == null) continue;
 
                 // Calculate heuristics and update accordingly
-                int heuristics = this.calculateHeuristics(result);
+                double heuristics = this.calculateHeuristics(result);
 
                 if (heuristicOutput == null || heuristics > heuristicOutput) {
                     desiredAction = action;
@@ -41,5 +41,5 @@ public abstract class HeuristicsPlayer implements Player {
         return desiredAction;
     }
 
-    protected abstract int calculateHeuristics(Analysis analysis);
+    protected abstract double calculateHeuristics(Analysis analysis);
 }

@@ -9,11 +9,11 @@ import logic.HeuristicsPlayer;
 public class UniversalPlayer extends HeuristicsPlayer {
 
     @Override
-    protected int calculateHeuristics(Analysis analysis) {
-        return -85 * analysis.getAggregateHeight() +
-                -91 * analysis.getRoughness() +
-                -99 * analysis.getHolesCount() +
-                -19 * analysis.getCellsCount() +
-                -53 * analysis.getHighestSlope();
+    protected double calculateHeuristics(Analysis analysis) {
+        return -10.0 * analysis.getAggregateHeight() +
+                -3.0 * analysis.getRoughness() +
+                -29.0 * analysis.getHolesCount() +
+                -7.0 * analysis.getCellsCount() +
+                -5.0 * analysis.getHighestSlope();
     }
 }

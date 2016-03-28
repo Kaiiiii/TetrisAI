@@ -146,7 +146,7 @@ public class State implements Comparable<State> {
     private static HeuristicsPlayer constructHeuristicsPlayer(State state) {
         return new HeuristicsPlayer() {
             @Override
-            protected int calculateHeuristics(Analysis analysis) {
+            protected double calculateHeuristics(Analysis analysis) {
                 return state.getValues()[0] * analysis.getAggregateHeight() +
                         state.getValues()[1] * analysis.getRoughness() +
                         state.getValues()[2] * analysis.getHolesCount() +
