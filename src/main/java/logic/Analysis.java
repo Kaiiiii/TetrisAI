@@ -14,7 +14,7 @@ public class Analysis {
     public Analysis(int[][] field) {
         int holes = 0;
         int roughness = 0;
-        int height = 0;
+        int aggregatedHeight = 0;
         int cells = 0;
         int highestSlope = 0;
 
@@ -45,7 +45,7 @@ public class Analysis {
 
             // HEIGHT update.
             int currentHeight = field.length - distanceFromTop;
-            if (currentHeight > height) height = currentHeight;
+            aggregatedHeight += currentHeight;
 
             // ROUGHNESS
             // When this column is the first column to be considered, we don't want (or don't have)
@@ -71,14 +71,14 @@ public class Analysis {
 
         // After we have already calculated the variables, set all of them
         this._cells = cells;
-        this._height = height;
+        this._height = aggregatedHeight;
         this._highestSlope = highestSlope;
         this._holes = holes;
         this._roughness = roughness;
     }
 
     public int getCellsCount() { return this._cells; }
-    public int getHeight() { return this._height; }
+    public int getAggregateHeight() { return this._height; }
     public int getHighestSlope() { return this._highestSlope; }
     public int getHolesCount() { return this._holes; }
     public int getRoughness() { return this._roughness; }
@@ -86,7 +86,7 @@ public class Analysis {
     @Override public String toString() {
         return String.format("Cells: %d\nHeight: %d\nHighest Slope: %d\nHoles: %d\nRoughness: %d",
                 this.getCellsCount(),
-                this.getHeight(),
+                this.getAggregateHeight(),
                 this.getHighestSlope(),
                 this.getHolesCount(),
                 this.getRoughness());

@@ -16,14 +16,8 @@ public class FieldAnalyzer {
     /**
      * Singleton class
      */
-    private static FieldAnalyzer instance = new FieldAnalyzer();
-
-    private FieldAnalyzer()  {
+    public FieldAnalyzer()  {
         this._workingArea = null;
-    }
-
-    public static FieldAnalyzer getInstance() {
-        return instance;
     }
 
     public Analysis analyze(Game game, Game.Action action) {

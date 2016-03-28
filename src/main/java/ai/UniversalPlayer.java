@@ -10,10 +10,10 @@ public class UniversalPlayer extends HeuristicsPlayer {
 
     @Override
     protected int calculateHeuristics(Analysis analysis) {
-        return -5 * analysis.getHeight() +
-                -3 * analysis.getRoughness() +
-                -29 * analysis.getHolesCount() +
-                -7 * analysis.getCellsCount() +
-                -5 * analysis.getHighestSlope();
+        return -85 * analysis.getAggregateHeight() +
+                -91 * analysis.getRoughness() +
+                -99 * analysis.getHolesCount() +
+                -19 * analysis.getCellsCount() +
+                -53 * analysis.getHighestSlope();
     }
 }

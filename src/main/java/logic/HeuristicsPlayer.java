@@ -2,6 +2,8 @@ package logic;
 
 import entities.Tetromino;
 
+import java.util.HashMap;
+
 /**
  * Created by maianhvu on 24/03/2016.
  */
@@ -13,6 +15,7 @@ public abstract class HeuristicsPlayer implements Player {
 
         Game.Action desiredAction = null;
         Integer heuristicOutput = null;
+        FieldAnalyzer analyzer = new FieldAnalyzer();
 
         for (Tetromino.Rotation rotation : meaningfulRotations) {
             int[] availablePositions = game.getAvailablePositionsFor(rotation);
@@ -20,7 +23,7 @@ public abstract class HeuristicsPlayer implements Player {
             // Create the action
             for (int position : availablePositions) {
                 Game.Action action = new Game.Action(rotation, position);
-                Analysis result = FieldAnalyzer.getInstance().analyze(game, action);
+                Analysis result = analyzer.analyze(game, action);
 
                 // Skip invalid moves
                 if (result == null) continue;
