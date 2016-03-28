@@ -1,4 +1,4 @@
-package tetris.model;
+package tetris.ui;
 
 import java.awt.BasicStroke;
 import java.awt.Color;

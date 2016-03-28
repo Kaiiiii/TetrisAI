@@ -1,9 +1,9 @@
-package tetris.agents;
+package tetris.ai;
 
 import java.util.Random;
 
-import tetris.model.State;
-import tetris.model.TFrame;
+import tetris.ui.State;
+import tetris.ui.TFrame;
 
 public class Player {
 

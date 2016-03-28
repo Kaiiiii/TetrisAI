@@ -1,4 +1,4 @@
-package tetris.model;
+package tetris.ui;
 
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
