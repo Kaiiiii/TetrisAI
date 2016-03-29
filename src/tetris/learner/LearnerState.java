@@ -1,5 +1,5 @@
 package tetris.learner;
 
-public class State {
+public class LearnerState {
 
 }
