@@ -16,6 +16,17 @@ public class Player {
         Random random = new Random();
         int[] candidateMove = legalMoves[random.nextInt(possibleMoves - 1)];
         
+//        for (int i = State.ROWS - 1; i >= 0; --i) {
+//            String output = new String();
+//            for (int j = 0; j < State.COLS ; ++j) {
+//                output += " " + s.getField()[i][j] + " ";                
+//            }
+//            System.out.println(output);
+//        }
+        
+//        System.out.println();
+
+        
         // Real Stuff Here ...
         UniversalPlayer smartPlayer = new UniversalPlayer();
         
