@@ -25,7 +25,7 @@ import java.awt.image.DataBuffer;
 import javax.swing.*;
 
 public class TLabel {
-    private static final long serialVersionUID = 1L;
+//    private static final long serialVersionUID = 1L;
 
     public JLabel draw;
 
@@ -543,6 +543,7 @@ public class TLabel {
     }
 
     // Invert an image
+    @SuppressWarnings("unused")
     public BufferedImage invert(Image image) {
         BufferedImage b1 = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_RGB);
         Graphics bg = b1.getGraphics();

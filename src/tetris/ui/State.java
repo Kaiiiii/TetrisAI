@@ -205,6 +205,7 @@ public class State {
     }
 
     // returns false if you lose - true otherwise
+    @SuppressWarnings("unused")
     public boolean makeMove(int orient, int slot) {
         turn++;
         // height if the first column makes contact
