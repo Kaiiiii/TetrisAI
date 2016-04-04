@@ -1,5 +1,6 @@
 import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.CountDownLatch;
 import java.util.function.Function;
 
 /**
@@ -19,8 +20,11 @@ public class SimulatedAnnealing implements LearningMethod {
 
     private Heuristics simulatedAnnealing(Heuristics initial, Function<Integer, Integer> schedule) {
         Heuristics current = initial;
+        double previousValue = new Benchmarker(current).benchmark(COUNT_BENCHMARKS);
+
         int time = 1;
         Random randomizer = new Random();
+
 
         while (true) {
             // Update temperature and check
@@ -32,15 +36,14 @@ public class SimulatedAnnealing implements LearningMethod {
             System.out.printf("#%d (%d)\t", time, temperature);
 
             Heuristics next = current.mutateHeuristics(HEURISTICS_MUTATION);
-            double desirability = Arrays.asList(current, next).parallelStream()
-                    .map(Benchmarker::new)
-                    .mapToDouble(bmarker -> bmarker.benchmark(COUNT_BENCHMARKS))
-                    .reduce((currentValue, nextValue) -> currentValue - nextValue)
-                    .getAsDouble();
+            double nextValue = new Benchmarker(next).benchmark(COUNT_BENCHMARKS);
+            double desirability = nextValue - previousValue;
+
             if (desirability > 0.0) {
                 System.out.printf("ASCEND\t[%s]->[%s]\tΔE = %.5f\n",
                         current, next, desirability);
                 current = next;
+                previousValue = nextValue;
             } else {
                 double threshold = Math.pow(Math.E, desirability * CLOCK / temperature);
                 double probability = randomizer.nextDouble();
@@ -49,6 +52,7 @@ public class SimulatedAnnealing implements LearningMethod {
                     System.out.printf("DESCEND\t[%s]->[%s]\tΔE = %.5f\tP = %.4f\n",
                             current, next, desirability, threshold);
                     current = next;
+                    previousValue = nextValue;
                 }
                 else {
                     System.out.printf("NO CHANGE\t[%s]\tΔE = %.5f\tP = %.4f\n",
