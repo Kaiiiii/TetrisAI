@@ -7,7 +7,7 @@ public class LocalSearcher {
 	public static void main(String[] args) {
 		LearnerState currentState = LearnerState.randomState();
 		while (true) {
-			LearnerState nextState = currentState.getNextBestState();
+			LearnerState nextState = new LearnerState (-37, -16, -75, -3, -56);
 			if (nextState == null) break;
 			int desirability = nextState.compareTo(currentState);
 			if (desirability < 0) {
