@@ -181,14 +181,11 @@ public class LearnerState {
 
     private static int getScore(HeuristicsPlayer player) {
         State game = new State();
-        new TFrame(game);
 
         while (!game.hasLost()) {
             game.makeMove(player.getNextMove(game, game.legalMoves()));
-            game.draw();
-            game.drawNext(0, 0);
             try {
-                Thread.sleep(300);
+                Thread.sleep(1);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

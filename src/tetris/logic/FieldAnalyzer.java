@@ -1,7 +1,5 @@
 package tetris.logic;
 
-import java.util.ArrayList;
-
 import tetris.ui.State;
 
 /**
@@ -9,101 +7,132 @@ import tetris.ui.State;
  */
 public class FieldAnalyzer {
 
-    /**
-     * Fixed Properties
-     */
-    private int[][] previewField;
-    private State currentState = null;
-    private int type = -1;
+	/**
+	 * Fixed Properties
+	 */
+	private int[][] previewField;
+	private State currentState = null;
+	private int nextPiece = -1;
+	public static final int[][][][] allPieces = {
+			{{{1,1},{1,1}}},
+			{{{1},{1},{1},{1}},{{1,1,1,1}}},
+			{{{1,1},{1,0},{1,0}},{{1,0,0},{1,1,1}},{{0,1},{0,1},{1,1}},{{1,1,1},{0,0,1}}},
+			{{{1,1},{0,1},{0,1}},{{1,1,1},{1,0,0}},{{1,0},{1,0},{1,1}},{{0,0,1},{1,1,1}}},
+			{{{1,0},{1,1},{1,0}},{{0,1,0},{1,1,1}},{{0,1},{1,1},{0,1}},{{1,1,1},{0,1,0}}},
+			{{{1,1,0},{0,1,1}},{{0,1},{1,1},{1,0}}},
+			{{{0,1,1},{1,1,0}},{{1,0},{1,1},{0,1}}}
+	};
 
-    /**
-     * Analysed Move Properties
-     */
-    private int[] currMove = null;
-    private int currOrientation = -1;
-    private int currSlot = -1;
-    private int[] currBase = null;
+	/**
+	 * Analysed Move Properties
+	 */
+	 private int[] currMove = null;
+	 private int currOrientation = -1;
+	 private int currSlot = -1;
+	 private int[] currBase = null;
+	 private int currWidth = -1;
+	 private int[][][] pBottom = null;
 
-    public FieldAnalyzer(State s) {
-        this.previewField = new int[State.ROWS][State.COLS];
-        currentState = s;
-        type = currentState.getNextPiece();
+	 public FieldAnalyzer(State s) {
+		 this.previewField = new int[State.ROWS][State.COLS];
+		 currentState = s;
+		 nextPiece = currentState.getNextPiece();
+	 }
 
-    }
+	 public Analysis analyze(int[] move) {
 
-    public Analysis analyze(int[] move) {
+		 // Get information of current move
+		 setMoveDetails(move);
 
-        // Get information of current move
-        setMoveDetails(move);
+		 // Lock in the piece
+		 lockInPiece();
 
-        // Find the row to place
-        int baseRow = getBaseRow();
+		 // Calculate analysis
+		 return new Analysis(this.previewField);
+	 }
 
-        // Lock in the piece
-        lockInPiece(baseRow);
+	 private void setMoveDetails(int[] move) {
+		 setCurrMove(move);
+		 currOrientation = move[State.ORIENT];
+		 currSlot = move[State.SLOT];
+		 currBase = currentState.getTop();
+		 int[][] widths = State.getpWidth();
+		 currWidth = widths[nextPiece][currOrientation];
+		 pBottom = State.getpBottom();
+		 
+		 // Copy state of current field to preview field
+		 int[][] currentField = currentState.getField();
+		 for (int fr=0;fr<20;fr++) {
+			 for (int fc=0;fc<10;fc++) {
+				 if (currentField[fr][fc] > 0) {
+					 previewField[fr][fc] = 1;
+				 } else {
+					 previewField[fr][fc] = 0;
+				 }
+			 }
+		 }
+	 }
 
-        // Calculate analysis
-        return new Analysis(this.previewField);
-    }
+	 private void lockInPiece() {
+		 int[] temp = new int[currWidth];
 
-    private void lockInPiece(int baseRow) {
-        int moveWidth = State.getpWidth()[type][currOrientation];
-        int[] moveHeight = State.getpTop()[type][currOrientation];
+		 for (int j=0;j<currWidth;j++) {
+			 temp[j]=currBase[j+currSlot];
+		 }
 
-        // Copy state of current field to preview field
-        int[][] currentField = currentState.getField();
+		 int maxBottom = getpBottom(nextPiece, pBottom, currOrientation, currWidth);
+		 addBottomHalf(nextPiece, pBottom, currOrientation, currWidth, temp, maxBottom);
+		 int tempMax = getTempMax(currWidth, temp);
+		 int firstAffectedRow = tempMax - maxBottom;
+		 int [][] curPiece = allPieces[nextPiece][currOrientation];
 
-        for (int i = 0; i < State.ROWS; ++i) {
-            System.arraycopy(currentField[i], 0, this.previewField[i], 0, this.previewField[0].length);
-        }
-        
-        // Place piece onto preview field
-        for (int i = 0; i < moveWidth; ++i) {
-            int fromBottom = currBase[i] + 1;
-            int toTop = moveHeight[i] - 1;
-            for (int j = fromBottom; j < toTop; ++j) {
-                previewField[j + baseRow][i + currSlot] = 1;
-            }
-        }
+		 for (int r=0;r<curPiece.length;r++) {
+			 for (int c=0;c<curPiece[r].length;c++) {
+				 if ((firstAffectedRow+r)>=20) {
+					 break;
+				 } else {
+					 previewField[firstAffectedRow+r][currSlot+c] = curPiece[r][c];
+				 }
+			 }
+		 }
+	 }
 
-    }
+	 //check all pBottom of piece in orientation 
+	 public int getpBottom(int nextPiece, int[][][] pBottom, int pOrient, int pWidth) {
+		 int maxBottom= 0;
+		 for (int k=0;k<pWidth;k++) {
+			 maxBottom = Math.max(maxBottom, pBottom[nextPiece][pOrient][k]);
+		 }
+		 return maxBottom;
+	 }
 
-    private void setMoveDetails(int[] move) {
-        setCurrMove(move);
-        currOrientation = move[State.ORIENT];
-        currSlot = move[State.SLOT];
-        currBase = State.getpBottom()[type][currOrientation];
-    }
+	 //add the bottom part of piece
+	 public void addBottomHalf(int nextPiece, int[][][] pBottom, int pOrient, int pWidth, int[] temp, int maxBottom) {
 
-    private int getBaseRow() {
+		 for (int a=0;a<pWidth;a++) {
+			 if (pBottom[nextPiece][pOrient][a]==0) {
+				 temp[a]+=maxBottom;
+			 }
+		 }
+	 }
 
-        ArrayList<Integer> relativeBase = new ArrayList<Integer>();
+	 //compare all temp heights
+	 public int getTempMax(int pWidth, int[] temp) {
+		 int tempMax = 0;
+		 for (int l=0;l<pWidth;l++) {
+			 if (temp[l]>tempMax){
+				 tempMax = temp[l];
+			 }
+		 }
+		 return tempMax;
+	 }
 
-        // Remember column indices that have the lowest (base) blocks
-        for (int i = 0; i < currBase.length; ++i) {
-            if (currBase[i] == 0) {
-                relativeBase.add(i + currSlot);
-            }
-        }
+	 public int[] getCurrMove() {
+		 return currMove;
+	 }
 
-        int highestRow = 0;
-        // Get the highest row among all existing blocks that comes in contact
-        // with the base blocks of the current move
-        for (int relativeBaseIndex : relativeBase) {
-            if (currentState.getTop()[relativeBaseIndex] > highestRow) {
-                highestRow = currentState.getTop()[relativeBaseIndex];
-            }
-        }
-
-        return highestRow;
-    }
-
-    public int[] getCurrMove() {
-        return currMove;
-    }
-
-    public void setCurrMove(int[] currMove) {
-        this.currMove = currMove;
-    }
+	 public void setCurrMove(int[] currMove) {
+		 this.currMove = currMove;
+	 }
 
 }
