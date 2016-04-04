@@ -1,9 +1,15 @@
+import java.util.Arrays;
+import java.util.Random;
+import java.util.stream.Collectors;
+
 /**
  * Created by maianhvu on 5/4/16.
  */
 public class Heuristics {
 
     private static final int COUNT_HEURISTICS = 4;
+    public static final double LOWER_BOUND = -1.0;
+    public static final double UPPER_BOUND = 1.0;
 
     private double[] _coefficients;
 
@@ -17,5 +23,52 @@ public class Heuristics {
                 this._coefficients[1] * result.getCompleteLines() +
                 this._coefficients[2] * result.getHolesCount() +
                 this._coefficients[3] * result.getBumpiness();
+    }
+
+    public static Heuristics randomHeuristics() {
+        Random randomizer = new Random();
+        double stretch = (UPPER_BOUND - LOWER_BOUND) / 2;
+        double[] coefficients = new double[COUNT_HEURISTICS];
+
+        for (int i = 0; i < COUNT_HEURISTICS; i++) {
+            coefficients[i] = randomizer.nextDouble() * stretch + LOWER_BOUND;
+            if (i == 2) coefficients[i] *= -1;
+        }
+
+        return new Heuristics(coefficients);
+    }
+
+    public Heuristics mutateHeuristics(double mutation) {
+        Random randomizer = new Random();
+        int valueToMutate = randomizer.nextInt(COUNT_HEURISTICS);
+        double[] newHeuristics = new double[COUNT_HEURISTICS];
+        System.arraycopy(this._coefficients, 0, newHeuristics, 0, COUNT_HEURISTICS);
+
+        boolean toIncrease = randomizer.nextBoolean();
+        newHeuristics[valueToMutate] += mutation * (toIncrease ? 1 : -1);
+        if (newHeuristics[valueToMutate] < LOWER_BOUND) {
+            newHeuristics[valueToMutate] = LOWER_BOUND;
+        }
+        if (newHeuristics[valueToMutate] > UPPER_BOUND) {
+            newHeuristics[valueToMutate] = UPPER_BOUND;
+        }
+        return new Heuristics(newHeuristics);
+    }
+
+    @Override public String toString() {
+        StringBuilder sb = new StringBuilder();
+        Arrays.stream(this._coefficients).mapToObj(value -> String.format("%.3f", value))
+                .forEachOrdered(valueString -> {
+                    if (sb.length() != 0) {
+                        sb.append(", ");
+                    }
+                    sb.append(valueString);
+                });
+        return sb.toString();
+    }
+
+    public String fullString() {
+        return String.join(", ", Arrays.stream(this._coefficients).mapToObj(Double::toString)
+                .collect(Collectors.toList()).toArray(new String[0]));
     }
 }
