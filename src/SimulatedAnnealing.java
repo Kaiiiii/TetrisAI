@@ -45,7 +45,7 @@ public class SimulatedAnnealing implements LearningMethod {
                 current = next;
                 previousValue = nextValue;
             } else {
-                double threshold = Math.pow(Math.E, desirability * CLOCK / temperature);
+                double threshold = Math.pow(Math.E, desirability / temperature);
                 double probability = randomizer.nextDouble();
 
                 if (probability <= threshold) {
