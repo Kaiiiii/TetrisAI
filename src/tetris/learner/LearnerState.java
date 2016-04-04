@@ -4,7 +4,6 @@ import tetris.logic.Analysis;
 import tetris.logic.HeuristicsPlayer;
 
 import tetris.ui.State;
-import tetris.ui.TFrame;
 
 import java.util.*;
 import java.util.concurrent.CountDownLatch;

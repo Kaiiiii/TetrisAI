@@ -76,6 +76,7 @@ public class Analysis {
 		// After we have already calculated the variables, set all of them
 		this._cells = cells;
 		this._height = maxHeight;
+//		this._height = aggregatedHeight;
 		this._highestSlope = highestSlope;
 		this._holes = holes;
 		this._roughness = roughness;
