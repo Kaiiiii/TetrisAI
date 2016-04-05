@@ -19,7 +19,7 @@ public class PlayerSkeleton {
 	//aggregatedHeightRatio = -0.510066;
 	//holeRatio = -0.35663;
 	//bumpinessRatio = -0.184483;
-	//clearRatio = 0.760666;
+	//clearRatio = -0.760666;
 	//maxHeightRatio = -0;
 	//maxSlopeRatio = -0;
 	//totalHolesRatio = -0;
@@ -27,7 +27,7 @@ public class PlayerSkeleton {
 	private double aggregatedHeightRatio = -0.510066;
 	private double holeRatio = -0.35663;
 	private double bumpinessRatio = -0.184483;
-	private double clearRatio = 0.760666;
+	private double clearRatio = -0.760666;
 	private double maxHeightRatio = -0;
 	private double maxSlopeRatio = -0;
 	private double totalHolesRatio = -0;
@@ -48,14 +48,14 @@ public class PlayerSkeleton {
 			double resultPoint = aggregatedHeightRatio*(double)aggregatedHeightPoints[result] 
 					+ holeRatio*(double)holeCausedPoints[result] 
 							+ bumpinessRatio*(double)bumpinessPoints[result] 
-									+ clearRatio*(double)clearPoints[result]
+									+ clearRatio*(double)clearPoints[result]*(-1)
 											+ maxSlopeRatio*(double)maxSlopePoints[result]
 													+ maxHeightRatio*(double)maxHeightPoints[result]
 															+ totalHolesRatio*(double)totalHolesPoints[result];
 			double checkPoint = aggregatedHeightRatio*(double)aggregatedHeightPoints[i] 
 					+ holeRatio*(double)holeCausedPoints[i] 
 							+ bumpinessRatio*(double)bumpinessPoints[i] 
-									+ clearRatio*clearPoints[i]
+									+ clearRatio*clearPoints[i]*(-1)
 											+ maxSlopeRatio*(double)maxSlopePoints[i]
 													+ maxHeightRatio*(double)maxHeightPoints[i]
 															+ totalHolesRatio*(double)totalHolesPoints[i];
@@ -67,11 +67,21 @@ public class PlayerSkeleton {
 		return result;
 	}
 
+	public void setRatios(double[] ratios){
+		aggregatedHeightRatio = ratios[0];
+		holeRatio = ratios[1];
+		bumpinessRatio = ratios[2];
+		clearRatio = ratios[3];
+		maxHeightRatio = ratios[4];
+		maxSlopeRatio = ratios[5];
+		totalHolesRatio = ratios[7];
+	}
+	
 	//calculate the points from resulted row cleared in each affected column.
 	//return the resulted rows cleared after move. higher the better.
 	//points[0] == rows cleared
 	//points[1] == total holes count
-	public int[][] calFieldPoints(State s, int[][] legalMoves) {    
+	private int[][] calFieldPoints(State s, int[][] legalMoves) {    
 		int nextPiece = s.getNextPiece();
 		int[][] points = new int[2][legalMoves.length];
 		int[] boardHeights = s.getTop();
@@ -149,7 +159,7 @@ public class PlayerSkeleton {
 	//return the resulted holes after move. lower the better.
 	//points[0] == bumpiness or roughness
 	//points[1] == max slope
-	public int[][] calSlopePoints(State s, int[][] legalMoves) {    
+	private int[][] calSlopePoints(State s, int[][] legalMoves) {    
 		int nextPiece = s.getNextPiece();
 		int[][] points = new int[2][legalMoves.length];
 		int[] boardHeights = s.getTop();
@@ -187,7 +197,7 @@ public class PlayerSkeleton {
 	}
 
 	//sum of bumpiness
-	public int sumForBumpiness(int[] tempBoard) {
+	private int sumForBumpiness(int[] tempBoard) {
 		int temp = 0;
 		for (int i=1;i<tempBoard.length;i++) {
 			temp += Math.abs(tempBoard[i]-tempBoard[i-1]);
@@ -196,7 +206,7 @@ public class PlayerSkeleton {
 	}
 
 	//get the steepest slope
-	public int getMaxSlope(int[] tempBoard) {
+	private int getMaxSlope(int[] tempBoard) {
 		int slope = 0;
 		int temp = 0;
 		for (int i=1;i<tempBoard.length;i++) {
@@ -210,7 +220,7 @@ public class PlayerSkeleton {
 
 	//calculate the points from resulted holes in each affected column.
 	//return the resulted holes after move. lower the better.
-	public int[] calHolePoints(State s, int[][] legalMoves) {    
+	private int[] calHolePoints(State s, int[][] legalMoves) {    
 		int nextPiece = s.getNextPiece();
 		int[] points = new int[legalMoves.length];
 		int[] boardHeights = s.getTop();
@@ -241,7 +251,7 @@ public class PlayerSkeleton {
 	//return the increased in height after move. lower the better.
 	//point[0] == aggregated height
 	//point[1] == max height
-	public int[][] calHeightPoints(State s, int[][] legalMoves) {
+	private int[][] calHeightPoints(State s, int[][] legalMoves) {
 		int nextPiece = s.getNextPiece();
 		int[][] points = new int[2][legalMoves.length];
 		int[] boardHeights = s.getTop();
@@ -279,7 +289,7 @@ public class PlayerSkeleton {
 	}
 
 	//sum of newHeight
-	public int sumForHeight(int[] tempBoard) {
+	private int sumForHeight(int[] tempBoard) {
 		int temp = 0;
 		for (int i=0;i<tempBoard.length;i++) {
 			temp += tempBoard[i];
@@ -288,7 +298,7 @@ public class PlayerSkeleton {
 	}
 
 	//get the heighest height
-	public int getMaxHeight(int[] tempBoard) {
+	private int getMaxHeight(int[] tempBoard) {
 		int temp = 0;
 		for (int i=0;i<tempBoard.length;i++) {
 			if(tempBoard[i]>=temp) {
@@ -299,21 +309,21 @@ public class PlayerSkeleton {
 	}
 
 	//add the top part of piece
-	public void addTopHalf(int nextPiece, int[][][] pTop, int pOrient, int pWidth, int[] temp, int maxBottom) {
+	private void addTopHalf(int nextPiece, int[][][] pTop, int pOrient, int pWidth, int[] temp, int maxBottom) {
 		for (int n=0;n<pWidth;n++) {
 			temp[n]+=pTop[nextPiece][pOrient][n]-maxBottom;
 		}
 	}
 
 	//set all temp as the max
-	public void setAllTempMax(int pWidth, int[] temp, int tempMax) {
+	private void setAllTempMax(int pWidth, int[] temp, int tempMax) {
 		for (int m=0; m<pWidth; m++){
 			temp[m]=tempMax;
 		}
 	}
 
 	//compare all temp heights
-	public int getTempMax(int pWidth, int[] temp) {
+	private int getTempMax(int pWidth, int[] temp) {
 		int tempMax = 0;
 		for (int l=0;l<pWidth;l++) {
 			if (temp[l]>tempMax){
@@ -324,7 +334,7 @@ public class PlayerSkeleton {
 	}
 
 	//add the bottom part of piece
-	public void addBottomHalf(int nextPiece, int[][][] pBottom, int pOrient, int pWidth, int[] temp, int maxBottom) {
+	private void addBottomHalf(int nextPiece, int[][][] pBottom, int pOrient, int pWidth, int[] temp, int maxBottom) {
 
 		for (int a=0;a<pWidth;a++) {
 			if (pBottom[nextPiece][pOrient][a]==0) {
@@ -334,7 +344,7 @@ public class PlayerSkeleton {
 	}
 
 	//check all pBottom of piece in orientation 
-	public int getpBottom(int nextPiece, int[][][] pBottom, int pOrient, int pWidth) {
+	private int getpBottom(int nextPiece, int[][][] pBottom, int pOrient, int pWidth) {
 		int maxBottom= 0;
 		for (int k=0;k<pWidth;k++) {
 			maxBottom = Math.max(maxBottom, pBottom[nextPiece][pOrient][k]);
@@ -351,7 +361,7 @@ public class PlayerSkeleton {
 			s.draw();
 			s.drawNext(0,0);
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(1);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
