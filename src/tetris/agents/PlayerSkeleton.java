@@ -1,11 +1,8 @@
 package tetris.agents;
 
-import java.util.*;
+import tetris.model.*;
 
-import tetris.model.State;
-import tetris.model.TFrame;
-
-public class Player {
+public class PlayerSkeleton {
 
 	//piece, orientation, rows, cols
 	//1 = block, 0 = hole
@@ -18,23 +15,50 @@ public class Player {
 			{{{1,1,0},{0,1,1}},{{0,1},{1,1},{1,0}}},
 			{{{0,1,1},{1,1,0}},{{1,0},{1,1},{0,1}}}
 	};
+	//default
+	//aggregatedHeightRatio = -0.510066;
+	//holeRatio = -0.35663;
+	//bumpinessRatio = -0.184483;
+	//clearRatio = 0.760666;
+	//maxHeightRatio = -0;
+	//maxSlopeRatio = -0;
+	//totalHolesRatio = -0;
+	
+	private double aggregatedHeightRatio = -0.510066;
+	private double holeRatio = -0.35663;
+	private double bumpinessRatio = -0.184483;
+	private double clearRatio = 0.760666;
+	private double maxHeightRatio = -0;
+	private double maxSlopeRatio = -0;
+	private double totalHolesRatio = -0;
 
 	//pieces ordering from State = O I L J T S Z
 	//implement this function to have a working system
 	public int pickMove(State s, int[][] legalMoves) {
-		int[] heightPoints = calHeightPoints(s, legalMoves);
-		int[] holePoints = calHolePoints(s, legalMoves);
-		int[] bumpinessPoints = calBumpinessPoints(s, legalMoves);
-		int[] clearPoints = calClearPoints(s, legalMoves);
-
+		int[] aggregatedHeightPoints = calHeightPoints(s, legalMoves)[0];
+		int[] maxHeightPoints = calHeightPoints(s, legalMoves)[1];
+		int[] holeCausedPoints = calHolePoints(s, legalMoves);
+		int[] bumpinessPoints = calSlopePoints(s, legalMoves)[0];
+		int[] maxSlopePoints = calSlopePoints(s, legalMoves)[1];
+		int[] clearPoints = calFieldPoints(s, legalMoves)[0];
+		int[] totalHolesPoints = calFieldPoints(s, legalMoves)[1];
 		int result = 0;
-		double a = -0.510066;
-		double b = -0.35663;
-		double c = -0.184483;
-		double d = 0.760666;
+
 		for (int i=1; i<legalMoves.length; i++) {
-			double resultPoint = a*(double)heightPoints[result] + b*(double)holePoints[result] + c*(double)bumpinessPoints[result] + d*clearPoints[result];
-			double checkPoint = a*(double)heightPoints[i] + b*(double)holePoints[i] + c*(double)bumpinessPoints[i] + d*clearPoints[i];
+			double resultPoint = aggregatedHeightRatio*(double)aggregatedHeightPoints[result] 
+					+ holeRatio*(double)holeCausedPoints[result] 
+							+ bumpinessRatio*(double)bumpinessPoints[result] 
+									+ clearRatio*(double)clearPoints[result]
+											+ maxSlopeRatio*(double)maxSlopePoints[result]
+													+ maxHeightRatio*(double)maxHeightPoints[result]
+															+ totalHolesRatio*(double)totalHolesPoints[result];
+			double checkPoint = aggregatedHeightRatio*(double)aggregatedHeightPoints[i] 
+					+ holeRatio*(double)holeCausedPoints[i] 
+							+ bumpinessRatio*(double)bumpinessPoints[i] 
+									+ clearRatio*clearPoints[i]
+											+ maxSlopeRatio*(double)maxSlopePoints[i]
+													+ maxHeightRatio*(double)maxHeightPoints[i]
+															+ totalHolesRatio*(double)totalHolesPoints[i];
 			if (resultPoint<=checkPoint){
 				result = i;
 			}
@@ -45,9 +69,11 @@ public class Player {
 
 	//calculate the points from resulted row cleared in each affected column.
 	//return the resulted rows cleared after move. higher the better.
-	public int[] calClearPoints(State s, int[][] legalMoves) {    
+	//points[0] == rows cleared
+	//points[1] == total holes count
+	public int[][] calFieldPoints(State s, int[][] legalMoves) {    
 		int nextPiece = s.getNextPiece();
-		int[] points = new int[legalMoves.length];
+		int[][] points = new int[2][legalMoves.length];
 		int[] boardHeights = s.getTop();
 		int[][] allWidth = s.getpWidth();
 		int[][] field = s.getField();
@@ -98,7 +124,22 @@ public class Player {
 				count += clear;
 			}
 
-			points[i] = count;
+			int holes =0;
+			boolean flag = false;
+			for (int c=0;c<10;c++) {
+				flag = false;
+				for (int r=19; r>=0; r--) {
+					if (!flag && tempField[r][c]>0) {
+						flag = true;
+					}
+					if (flag && tempField[r][c]==0) {
+						holes+=1;
+					}
+				}
+			}
+
+			points[0][i] = count;
+			points[1][i] = holes;
 		}
 
 		return points;
@@ -106,9 +147,11 @@ public class Player {
 
 	//calculate the points from resulted holes in each affected column.
 	//return the resulted holes after move. lower the better.
-	public int[] calBumpinessPoints(State s, int[][] legalMoves) {    
+	//points[0] == bumpiness or roughness
+	//points[1] == max slope
+	public int[][] calSlopePoints(State s, int[][] legalMoves) {    
 		int nextPiece = s.getNextPiece();
-		int[] points = new int[legalMoves.length];
+		int[][] points = new int[2][legalMoves.length];
 		int[] boardHeights = s.getTop();
 		int[][] allWidth = s.getpWidth();
 		int[][][] pTop = s.getpTop();
@@ -137,18 +180,32 @@ public class Player {
 				}
 			}
 
-			points[i] = sumForBumpiness(tempBoard);
+			points[0][i] = sumForBumpiness(tempBoard);
+			points[1][i] = getMaxSlope(tempBoard);
 		}
 		return points;
 	}
 
 	//sum of bumpiness
 	public int sumForBumpiness(int[] tempBoard) {
-		int bumpiness = 0;
+		int temp = 0;
 		for (int i=1;i<tempBoard.length;i++) {
-			bumpiness += Math.abs(tempBoard[i]-tempBoard[i-1]);
+			temp += Math.abs(tempBoard[i]-tempBoard[i-1]);
 		}
-		return bumpiness;
+		return temp;
+	}
+
+	//get the steepest slope
+	public int getMaxSlope(int[] tempBoard) {
+		int slope = 0;
+		int temp = 0;
+		for (int i=1;i<tempBoard.length;i++) {
+			temp = Math.abs(tempBoard[i]-tempBoard[i-1]);
+			if (temp>slope) {
+				slope = temp;
+			}
+		}
+		return slope;
 	}
 
 	//calculate the points from resulted holes in each affected column.
@@ -182,9 +239,11 @@ public class Player {
 
 	//calculate the points from the height in each affected column.
 	//return the increased in height after move. lower the better.
-	public int[] calHeightPoints(State s, int[][] legalMoves) {
+	//point[0] == aggregated height
+	//point[1] == max height
+	public int[][] calHeightPoints(State s, int[][] legalMoves) {
 		int nextPiece = s.getNextPiece();
-		int[] points = new int[legalMoves.length];
+		int[][] points = new int[2][legalMoves.length];
 		int[] boardHeights = s.getTop();
 		int[][] allWidth = s.getpWidth();
 		int[][][] pTop = s.getpTop();
@@ -213,18 +272,30 @@ public class Player {
 				}
 			}
 
-			points[i] = sumForHeight(tempBoard);
+			points[0][i] = sumForHeight(tempBoard);
+			points[1][i] = getMaxHeight(tempBoard);
 		}
 		return points;
 	}
 
 	//sum of newHeight
 	public int sumForHeight(int[] tempBoard) {
-		int newHeight = 0;
+		int temp = 0;
 		for (int i=0;i<tempBoard.length;i++) {
-			newHeight += tempBoard[i];
+			temp += tempBoard[i];
 		}
-		return newHeight;
+		return temp;
+	}
+
+	//get the heighest height
+	public int getMaxHeight(int[] tempBoard) {
+		int temp = 0;
+		for (int i=0;i<tempBoard.length;i++) {
+			if(tempBoard[i]>=temp) {
+				temp = tempBoard[i];
+			}
+		}
+		return temp;
 	}
 
 	//add the top part of piece
@@ -274,19 +345,13 @@ public class Player {
 	public static void main(String[] args) {
 		State s = new State();
 		new TFrame(s);
-		Player p = new Player();
+		PlayerSkeleton p = new PlayerSkeleton();
 		while(!s.hasLost()) {
-
-			try {
-				s.makeMove(p.pickMove(s,s.legalMoves()));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
+			s.makeMove(p.pickMove(s,s.legalMoves()));
 			s.draw();
 			s.drawNext(0,0);
 			try {
-				Thread.sleep(3);
+				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
