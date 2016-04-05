@@ -15,21 +15,21 @@ public class PlayerSkeleton {
 			{{{1,1,0},{0,1,1}},{{0,1},{1,1},{1,0}}},
 			{{{0,1,1},{1,1,0}},{{1,0},{1,1},{0,1}}}
 	};
-	//default
-	//aggregatedHeightRatio = -0.510066;
-	//holeRatio = -0.35663;
-	//bumpinessRatio = -0.184483;
-	//clearRatio = -0.760666;
-	//maxHeightRatio = -0;
-	//maxSlopeRatio = -0;
-	//totalHolesRatio = -0;
+	//default (current best)
+	//private double aggregatedHeightRatio = -0.510066;
+	//private double holeRatio = -0.35663;
+	//private double bumpinessRatio = -0.184483;
+	//private double clearRatio = -0.760666;
+	//private double maxHeightRatio = -0;
+	//private double maxSlopeRatio = -0.1;
+	//private double totalHolesRatio = -0;
 	
 	private double aggregatedHeightRatio = -0.510066;
 	private double holeRatio = -0.35663;
 	private double bumpinessRatio = -0.184483;
 	private double clearRatio = -0.760666;
 	private double maxHeightRatio = -0;
-	private double maxSlopeRatio = -0;
+	private double maxSlopeRatio = -0.1;
 	private double totalHolesRatio = -0;
 
 	//pieces ordering from State = O I L J T S Z
@@ -85,10 +85,9 @@ public class PlayerSkeleton {
 		int nextPiece = s.getNextPiece();
 		int[][] points = new int[2][legalMoves.length];
 		int[] boardHeights = s.getTop();
-		int[][] allWidth = s.getpWidth();
+		int[][] allWidth = State.getpWidth();
 		int[][] field = s.getField();
-		int[][][] pTop = s.getpTop();
-		int[][][] pBottom = s.getpBottom();
+		int[][][] pBottom = State.getpBottom();
 		for (int i=0;i<legalMoves.length;i++){
 			int pOrient = legalMoves[i][0];
 			int pSlot = legalMoves[i][1];
@@ -134,25 +133,30 @@ public class PlayerSkeleton {
 				count += clear;
 			}
 
-			int holes =0;
-			boolean flag = false;
-			for (int c=0;c<10;c++) {
-				flag = false;
-				for (int r=19; r>=0; r--) {
-					if (!flag && tempField[r][c]>0) {
-						flag = true;
-					}
-					if (flag && tempField[r][c]==0) {
-						holes+=1;
-					}
-				}
-			}
+			int holes = countHoles(tempField);
 
 			points[0][i] = count;
 			points[1][i] = holes;
 		}
 
 		return points;
+	}
+
+	private int countHoles(int[][] tempField) {
+		int holes =0;
+		boolean flag = false;
+		for (int c=0;c<tempField[0].length;c++) {
+			flag = false;
+			for (int r=(tempField.length-1); r>=0; r--) {
+				if (!flag && tempField[r][c]>0) {
+					flag = true;
+				}
+				if (flag && tempField[r][c]==0) {
+					holes+=1;
+				}
+			}
+		}
+		return holes;
 	}
 
 	//calculate the points from resulted holes in each affected column.
@@ -163,9 +167,9 @@ public class PlayerSkeleton {
 		int nextPiece = s.getNextPiece();
 		int[][] points = new int[2][legalMoves.length];
 		int[] boardHeights = s.getTop();
-		int[][] allWidth = s.getpWidth();
-		int[][][] pTop = s.getpTop();
-		int[][][] pBottom = s.getpBottom();
+		int[][] allWidth = State.getpWidth();
+		int[][][] pTop = State.getpTop();
+		int[][][] pBottom = State.getpBottom();
 		for (int i=0;i<legalMoves.length;i++){
 			int pOrient = legalMoves[i][0];
 			int pSlot = legalMoves[i][1];
@@ -205,17 +209,19 @@ public class PlayerSkeleton {
 		return temp;
 	}
 
-	//get the steepest slope
+	//get the steepest slope (highest point to lowest point)
 	private int getMaxSlope(int[] tempBoard) {
-		int slope = 0;
-		int temp = 0;
-		for (int i=1;i<tempBoard.length;i++) {
-			temp = Math.abs(tempBoard[i]-tempBoard[i-1]);
-			if (temp>slope) {
-				slope = temp;
+		int tempHigh = 0;
+		int tempLow = 20;
+		for (int i=0;i<tempBoard.length;i++) {
+			if (tempBoard[i]>tempHigh) {
+				tempHigh = tempBoard[i];
+			}
+			if (tempBoard[i]<tempLow) {
+				tempLow = tempBoard[i];
 			}
 		}
-		return slope;
+		return Math.abs(tempLow-tempHigh);
 	}
 
 	//calculate the points from resulted holes in each affected column.
@@ -224,9 +230,9 @@ public class PlayerSkeleton {
 		int nextPiece = s.getNextPiece();
 		int[] points = new int[legalMoves.length];
 		int[] boardHeights = s.getTop();
-		int[][] allWidth = s.getpWidth();
-		int[][][] pTop = s.getpTop();
-		int[][][] pBottom = s.getpBottom();
+		int[][] field = s.getField();
+		int[][] allWidth = State.getpWidth();
+		int[][][] pBottom = State.getpBottom();
 		for (int i=0;i<legalMoves.length;i++){
 			int pOrient = legalMoves[i][0];
 			int pSlot = legalMoves[i][1];
@@ -239,10 +245,22 @@ public class PlayerSkeleton {
 			int maxBottom = getpBottom(nextPiece, pBottom, pOrient, pWidth);
 			addBottomHalf(nextPiece, pBottom, pOrient, pWidth, temp, maxBottom);
 			int tempMax = getTempMax(pWidth, temp);
-
+			
+			int holes = 0;
 			for (int k=0;k<pWidth;k++){
-				points[i] += Math.abs(temp[k]-tempMax);
+				holes += Math.abs(temp[k]-tempMax);
 			}
+			
+			//int[][] tempBoard = new int[20][pWidth];
+			//for (int c=0;c<pWidth;c++) {
+			//	for (int r=0;r<20;r++) {
+			//		tempBoard[r][c] = field[r][c+pSlot];
+			//	}
+			//}
+			
+			//holes += countHoles(tempBoard);
+			
+			points[i] = holes;
 		}
 		return points;
 	}
@@ -255,9 +273,9 @@ public class PlayerSkeleton {
 		int nextPiece = s.getNextPiece();
 		int[][] points = new int[2][legalMoves.length];
 		int[] boardHeights = s.getTop();
-		int[][] allWidth = s.getpWidth();
-		int[][][] pTop = s.getpTop();
-		int[][][] pBottom = s.getpBottom();
+		int[][] allWidth = State.getpWidth();
+		int[][][] pTop = State.getpTop();
+		int[][][] pBottom = State.getpBottom();
 		for (int i=0;i<legalMoves.length;i++){
 			int pOrient = legalMoves[i][0];
 			int pSlot = legalMoves[i][1];
@@ -297,7 +315,7 @@ public class PlayerSkeleton {
 		return temp;
 	}
 
-	//get the heighest height
+	//get the highest height
 	private int getMaxHeight(int[] tempBoard) {
 		int temp = 0;
 		for (int i=0;i<tempBoard.length;i++) {
