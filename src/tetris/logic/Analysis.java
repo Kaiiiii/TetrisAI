@@ -14,7 +14,8 @@ public class Analysis {
 	public Analysis(int[][] field) {
 		int holes = 0;
 		int roughness = 0;
-		int aggregatedHeight = 0;
+		@SuppressWarnings("unused")
+        int aggregatedHeight = 0;
 		int maxHeight = 0;
 		int cells = 0;
 		int highestSlope = 0;

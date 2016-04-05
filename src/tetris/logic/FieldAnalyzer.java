@@ -56,10 +56,10 @@ public class FieldAnalyzer {
         setCurrMove(move);
         currOrientation = move[State.ORIENT];
         currSlot = move[State.SLOT];
-        currBase = currentState.getTop();
+        setCurrBase(currentState.getTop());
         int[][] widths = State.getpWidth();
         currWidth = widths[nextPiece][currOrientation];
-        pBottom = State.getpBottom();
+        setpBottom(State.getpBottom());
 
         // Copy state of current field to preview field
         int[][] currentField = currentState.getField();
@@ -182,6 +182,22 @@ public class FieldAnalyzer {
 
     public void setCurrMove(int[] currMove) {
         this.currMove = currMove;
+    }
+
+    public int[] getCurrBase() {
+        return currBase;
+    }
+
+    public void setCurrBase(int[] currBase) {
+        this.currBase = currBase;
+    }
+
+    public int[][][] getpBottom() {
+        return pBottom;
+    }
+
+    public void setpBottom(int[][][] pBottom) {
+        this.pBottom = pBottom;
     }
 
 }
