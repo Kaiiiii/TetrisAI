@@ -32,7 +32,7 @@ public class Heuristics {
 
         for (int i = 0; i < COUNT_HEURISTICS; i++) {
             coefficients[i] = randomizer.nextDouble() * stretch + LOWER_BOUND;
-            if (i == 2) coefficients[i] *= -1;
+            if (i == 1) coefficients[i] *= -1;
         }
 
         return new Heuristics(coefficients);
