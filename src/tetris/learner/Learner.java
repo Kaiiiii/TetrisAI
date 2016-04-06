@@ -8,7 +8,7 @@ import tetris.model.*;
 public class Learner {
 
 	private static final int clock = 10000;
-	private static final int numberOfHeuristic = 7;
+	private static final int numberOfHeuristic = 4;
 	private static final int numberOfRuns = 5;
 	private static Random randomizer = new Random();
 
@@ -27,7 +27,7 @@ public class Learner {
 		double[] ratio4 = new double[numberOfHeuristic];
 		double[] ratio5 = new double[numberOfHeuristic];
 		ratio1 = randomRatio();
-		bestScore = getScore(ratio1);
+		updateBest(ratio1);
 		int count = clock;
 		while (count>0) {
 			boolean flag = false;
