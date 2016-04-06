@@ -7,13 +7,16 @@ import tetris.model.*;
 
 public class Learner {
 
-	private static final int clock = 1000;
-	private static final int numberOfHeuristic = 7;
-	private static final int numberOfRuns = 5;
+	private static final int CLOCK = 1000;
+	private static final int NUMBER_OF_HEURISTICS = 7;
+	private static final int MINIMUM_MUTATION = 3;	
+	private static final int NUMBER_OF_RUNS = 20;
+	private static final int MAX_REPEATS = 5;
 	private static Random randomizer = new Random();
 
-	private double[] bestRatio = new double[numberOfHeuristic];
+	private double[] bestRatio = new double[NUMBER_OF_HEURISTICS];
 	private int bestScore = 0;
+	private int logger = 0;
 
 	public static void main(String[] args) {
 		Learner learner = new Learner();
@@ -21,14 +24,15 @@ public class Learner {
 	}
 
 	private void geneticAlgo() {
-		double[] ratio1 = new double[numberOfHeuristic];
-		double[] ratio2 = new double[numberOfHeuristic];
-		double[] ratio3 = new double[numberOfHeuristic];
-		double[] ratio4 = new double[numberOfHeuristic];
-		double[] ratio5 = new double[numberOfHeuristic];
+		double[] ratio1 = new double[NUMBER_OF_HEURISTICS];
+		double[] ratio2 = new double[NUMBER_OF_HEURISTICS];
+		double[] ratio3 = new double[NUMBER_OF_HEURISTICS];
+		double[] ratio4 = new double[NUMBER_OF_HEURISTICS];
+		double[] ratio5 = new double[NUMBER_OF_HEURISTICS];
 		ratio1 = randomRatio();
 		updateBest(ratio1);
-		int count = clock;
+		int count = CLOCK;
+		int repeated = 0;
 		while (count>0) {
 			boolean flag = false;
 			ratio2 = randomRatio();
@@ -42,14 +46,28 @@ public class Learner {
 
 			int tries = 5;
 			while (!flag && tries>0) {
-				ratio5 = mutation(bestRatio);
+				ratio5 = mutation(bestRatio, repeated);
 				flag = updateBest(ratio5);
 				tries--;
 			}
 
-			System.arraycopy(bestRatio, 0, ratio1, 0, numberOfHeuristic);
+			System.arraycopy(bestRatio, 0, ratio1, 0, NUMBER_OF_HEURISTICS);
 			System.out.println("Counter: "+count+" --- Average Score: "+bestScore);
 			printArray(bestRatio);
+			if (bestScore != logger) {
+				logger = bestScore;
+				repeated = 0;
+			} else {
+				repeated++;
+			}
+
+			if (repeated==(MAX_REPEATS-1)) {
+				//re-evaluation if ratio is stagnant for 10 cycle
+				bestScore = getScore(bestRatio);
+				System.out.println("Re-Evaluated Score: " + bestScore);
+				repeated = 0;
+			}
+
 			if(bestScore > 1000000) {
 				break;
 			}
@@ -57,17 +75,25 @@ public class Learner {
 		}
 	}
 
-	private double[] mutation(double[] ratio) {
-		int[] slot = new int[numberOfHeuristic];
-		for (int i=0;i<numberOfHeuristic;i++) {
-			slot[i] = randomizer.nextInt(numberOfHeuristic);
+	private double[] mutation(double[] ratio, int type) {
+		int[] slot = new int[randomizer.nextInt(NUMBER_OF_HEURISTICS-MINIMUM_MUTATION)+MINIMUM_MUTATION];
+		for (int i=0;i<slot.length;i++) {
+			slot[i] = randomizer.nextInt(NUMBER_OF_HEURISTICS-MINIMUM_MUTATION-1)+MINIMUM_MUTATION;
 		}
-		double adder = randomizer.nextDouble();
-		double[] temp = new double[numberOfHeuristic];
-		System.arraycopy(ratio, 0, temp, 0, numberOfHeuristic);
-		for (int i=0;i<numberOfHeuristic;i++) {
-			temp[slot[i]] += adder;
-		}		
+		double mutator = randomizer.nextDouble();
+		double[] temp = new double[NUMBER_OF_HEURISTICS];
+		System.arraycopy(ratio, 0, temp, 0, NUMBER_OF_HEURISTICS);
+		for (int i=0;i<slot.length;i++) {
+			if (type==5) {
+				temp[slot[i]] /= mutator;
+			} else if (type == 4) {
+				temp[slot[i]] *= mutator;
+			} else if (type == 3) {
+				temp[slot[i]] -= mutator;
+			} else {
+				temp[slot[i]] += mutator;
+			}
+		}  
 		return temp;
 	}
 
@@ -78,7 +104,7 @@ public class Learner {
 		if (tempScore > bestScore) {
 			flag = true;
 			bestScore = tempScore;
-			System.arraycopy(ratio, 0, bestRatio, 0, numberOfHeuristic);
+			System.arraycopy(ratio, 0, bestRatio, 0, NUMBER_OF_HEURISTICS);
 		}
 		return flag;
 	}
@@ -91,8 +117,8 @@ public class Learner {
 	}
 
 	private static double[] crossover(double[] ratio1, double[] ratio2) {
-		double[] temp = new double[numberOfHeuristic];
-		for (int i=0;i<numberOfHeuristic;i++) {
+		double[] temp = new double[NUMBER_OF_HEURISTICS];
+		for (int i=0;i<NUMBER_OF_HEURISTICS;i++) {
 			if (i<4) {
 				temp[i] = ratio1[i];
 			} else {
@@ -103,8 +129,8 @@ public class Learner {
 	}
 
 	private double[] randomRatio() {
-		double[] ratio = new double[numberOfHeuristic];
-		for (int i=0;i<numberOfHeuristic;i++) {
+		double[] ratio = new double[NUMBER_OF_HEURISTICS];
+		for (int i=0;i<NUMBER_OF_HEURISTICS;i++) {
 			ratio[i] = randomizer.nextDouble();
 		}
 		return ratio;
@@ -112,7 +138,7 @@ public class Learner {
 
 	private int getScore(double[] ratio) {
 		int score = 0;
-		for (int i=0;i<numberOfRuns;i++) {
+		for (int i=0;i<NUMBER_OF_RUNS;i++) {
 			State s = new State();
 			PlayerSkeleton p = new PlayerSkeleton();
 			p.setRatios(ratio);
@@ -126,6 +152,6 @@ public class Learner {
 			}
 			score += s.getRowsCleared();
 		}
-		return score/numberOfRuns;
+		return score/NUMBER_OF_RUNS;
 	}
 }
