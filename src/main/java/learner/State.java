@@ -103,6 +103,35 @@ public class State implements Comparable<State> {
         return stateToReturn[0];
     }
 
+    public int getScore(){
+        List<Thread> computeThreads = new ArrayList<>();
+        final int[] score = new int[1];
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        if (this._score == null){
+            computeThreads.add(new Thread(() -> {
+                score[0] = benchmark(constructHeuristicsPlayer(this));
+                latch.countDown();
+            }));
+        }
+        else{
+            score[0] = this._score;
+            latch.countDown();
+        }
+
+        computeThreads.stream().forEach(Thread::start);
+
+        try{
+            latch.await();
+        }catch (InterruptedException e){
+            e.printStackTrace();
+        }
+
+        this._score = score[0];
+
+        return score[0];
+    }
+
     @Override
     public int compareTo(State s) {
         List<Thread> computeThreads = new ArrayList<>();
