@@ -7,8 +7,8 @@ import tetris.model.*;
 
 public class Learner {
 
-	private static final int clock = 10000;
-	private static final int numberOfHeuristic = 4;
+	private static final int clock = 1000;
+	private static final int numberOfHeuristic = 7;
 	private static final int numberOfRuns = 5;
 	private static Random randomizer = new Random();
 

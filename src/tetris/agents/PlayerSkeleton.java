@@ -23,14 +23,14 @@ public class PlayerSkeleton {
 	//private double maxHeightRatio = -0;
 	//private double maxSlopeRatio = -0.1;
 	//private double totalHolesRatio = -0;
-	
-	private double aggregatedHeightRatio = 0;
-	private double holeRatio = 0;
-	private double bumpinessRatio = 0;
-	private double clearRatio = 0;
-	private double maxHeightRatio = 0;
-	private double maxSlopeRatio = 0;
-	private double totalHolesRatio = 0;
+
+	private double aggregatedHeightRatio = 2.5317086201240695;
+	private double holeRatio = 5.2208397511276665;
+	private double bumpinessRatio = 1.708253148775087;
+	private double clearRatio = 7.1689940897600613;
+	private double maxHeightRatio = 0.3605407165806438;
+	private double maxSlopeRatio = 0.5619471958827675;
+	private double totalHolesRatio = 0.1205021313487526;
 
 	//pieces ordering from State = O I L J T S Z
 	//implement this function to have a working system
@@ -392,6 +392,7 @@ public class PlayerSkeleton {
 			}
 		}
 		System.out.println("You have completed "+s.getRowsCleared()+" rows.");
+		System.exit(0);
 	}
 
 }
