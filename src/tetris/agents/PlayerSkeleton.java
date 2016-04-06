@@ -24,13 +24,13 @@ public class PlayerSkeleton {
 	//private double maxSlopeRatio = -0.1;
 	//private double totalHolesRatio = -0;
 	
-	private double aggregatedHeightRatio = -0.510066;
-	private double holeRatio = -0.35663;
-	private double bumpinessRatio = -0.184483;
-	private double clearRatio = -0.760666;
-	private double maxHeightRatio = -0;
-	private double maxSlopeRatio = -0.1;
-	private double totalHolesRatio = -0;
+	private double aggregatedHeightRatio = 0;
+	private double holeRatio = 0;
+	private double bumpinessRatio = 0;
+	private double clearRatio = 0;
+	private double maxHeightRatio = 0;
+	private double maxSlopeRatio = 0;
+	private double totalHolesRatio = 0;
 
 	//pieces ordering from State = O I L J T S Z
 	//implement this function to have a working system
@@ -45,20 +45,20 @@ public class PlayerSkeleton {
 		int result = 0;
 
 		for (int i=1; i<legalMoves.length; i++) {
-			double resultPoint = aggregatedHeightRatio*(double)aggregatedHeightPoints[result] 
-					+ holeRatio*(double)holeCausedPoints[result] 
-							+ bumpinessRatio*(double)bumpinessPoints[result] 
-									+ clearRatio*(double)clearPoints[result]*(-1)
-											+ maxSlopeRatio*(double)maxSlopePoints[result]
-													+ maxHeightRatio*(double)maxHeightPoints[result]
-															+ totalHolesRatio*(double)totalHolesPoints[result];
-			double checkPoint = aggregatedHeightRatio*(double)aggregatedHeightPoints[i] 
-					+ holeRatio*(double)holeCausedPoints[i] 
-							+ bumpinessRatio*(double)bumpinessPoints[i] 
-									+ clearRatio*clearPoints[i]*(-1)
-											+ maxSlopeRatio*(double)maxSlopePoints[i]
-													+ maxHeightRatio*(double)maxHeightPoints[i]
-															+ totalHolesRatio*(double)totalHolesPoints[i];
+			double resultPoint = aggregatedHeightRatio*(double)aggregatedHeightPoints[result]*(-1) 
+					+ holeRatio*(double)holeCausedPoints[result]*(-1)
+							+ bumpinessRatio*(double)bumpinessPoints[result]*(-1) 
+									+ clearRatio*(double)clearPoints[result]
+											+ maxSlopeRatio*(double)maxSlopePoints[result]*(-1)
+													+ maxHeightRatio*(double)maxHeightPoints[result]*(-1)
+															+ totalHolesRatio*(double)totalHolesPoints[result]*(-1);
+			double checkPoint = aggregatedHeightRatio*(double)aggregatedHeightPoints[i]*(-1) 
+					+ holeRatio*(double)holeCausedPoints[i]*(-1) 
+							+ bumpinessRatio*(double)bumpinessPoints[i]*(-1) 
+									+ clearRatio*clearPoints[i]
+											+ maxSlopeRatio*(double)maxSlopePoints[i]*(-1)
+													+ maxHeightRatio*(double)maxHeightPoints[i]*(-1)
+															+ totalHolesRatio*(double)totalHolesPoints[i]*(-1);
 			if (resultPoint<=checkPoint){
 				result = i;
 			}
@@ -74,7 +74,7 @@ public class PlayerSkeleton {
 		clearRatio = ratios[3];
 		maxHeightRatio = ratios[4];
 		maxSlopeRatio = ratios[5];
-		totalHolesRatio = ratios[7];
+		totalHolesRatio = ratios[6];
 	}
 	
 	//calculate the points from resulted row cleared in each affected column.
