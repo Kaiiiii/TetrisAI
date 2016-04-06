@@ -9,8 +9,9 @@ import java.util.function.Function;
 public class Blacksmith {
     private static final int POPULATION_SIZE = 100;
     private static final int HEURISTIC_COUNT = 5;
-    private static final int UPPER = -1;
     private static final int LOWER = -100;
+    private static final int UPPER = -1;
+
     private static final int CLOCK = 1000;
     private static Random randomizer = new Random();
 
@@ -29,7 +30,7 @@ public class Blacksmith {
     private void geneticAlgorithm () {
         //Initialising a new population
         State[] population = new State[POPULATION_SIZE], nextPop = new State[POPULATION_SIZE];
-        int maxScore = 0;
+        int maxScore = 0, totalScore = 0;
 
         for (int i = 0; i < POPULATION_SIZE; i++) {
             population[i] = State.randomState();
@@ -37,16 +38,20 @@ public class Blacksmith {
 
         State[] parents = new State[2];
         while (true) {
+            totalScore = 0;
             //Printing Population scores
             System.out.print("Population Scores: [");
             for (int i = 0; i < POPULATION_SIZE; i++) {
                 System.out.print(population[i].getScore());
                 if (population[i].getScore()>population[maxScore].getScore())
                     maxScore = i;
+                totalScore += population[i].getScore();
                 if (i == POPULATION_SIZE - 1) break;
                 System.out.print(", ");
             }
             System.out.println("]");
+
+            System.out.println("Average Population Score: " + totalScore/POPULATION_SIZE);
 
             //Printing best player
             System.out.print("Best Player: [");
@@ -102,14 +107,15 @@ public class Blacksmith {
     private State nextGeneration(State[] parents){
         int[] heuristic = new int[HEURISTIC_COUNT];
 
-        for (int i = 0; i<HEURISTIC_COUNT; i++){
-            if (parents[0].getScore()*randomizer.nextDouble() >= parents[1].getScore()*randomizer.nextDouble()) {
+        for (int i = 0; i<HEURISTIC_COUNT; i++) {
+            if (parents[0].getScore() * randomizer.nextDouble() >= parents[1].getScore() * randomizer.nextDouble()) {
                 heuristic[i] = parents[0].getValues()[i];
-            }else heuristic[i] = parents[1].getValues()[i];
-            if (randomizer.nextInt(101)<=1) heuristic[i] = heuristic[i] + randomizer.nextInt(100) - randomizer.nextInt(100);
-            if (heuristic[i]<-100) heuristic[i] = -100;
-            else if (heuristic[i]>-1) heuristic[i] = -1;
-
+            } else heuristic[i] = parents[1].getValues()[i];
+            if (randomizer.nextInt(101) <= randomizer.nextInt(101)) {
+                heuristic[i] = heuristic[i] + randomizer.nextInt(100) - randomizer.nextInt(100);
+            }
+            if (heuristic[i] < LOWER) heuristic[i] = -100;
+            else if (heuristic[i] > UPPER) heuristic[i] = -1;
         }
         return new State(heuristic);
     }
