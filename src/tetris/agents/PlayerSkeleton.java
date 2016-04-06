@@ -68,13 +68,20 @@ public class PlayerSkeleton {
 	}
 
 	public void setRatios(double[] ratios){
-		aggregatedHeightRatio = ratios[0];
-		holeRatio = ratios[1];
-		bumpinessRatio = ratios[2];
-		clearRatio = ratios[3];
-		maxHeightRatio = ratios[4];
-		maxSlopeRatio = ratios[5];
-		totalHolesRatio = ratios[6];
+		if (ratios.length >= 1)
+			aggregatedHeightRatio = ratios[0];
+		if (ratios.length >= 2)
+			holeRatio = ratios[1];
+		if (ratios.length >= 3)
+			bumpinessRatio = ratios[2];
+		if (ratios.length >= 4)
+			clearRatio = ratios[3];
+		if (ratios.length >= 5)
+			maxHeightRatio = ratios[4];
+		if (ratios.length >= 6)
+			maxSlopeRatio = ratios[5];
+		if (ratios.length == 7)
+			totalHolesRatio = ratios[6];
 	}
 	
 	//calculate the points from resulted row cleared in each affected column.
