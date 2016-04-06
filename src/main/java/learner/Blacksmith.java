@@ -7,7 +7,7 @@ import java.util.function.Function;
  * Created by maianhvu on 28/03/2016.
  */
 public class Blacksmith {
-    private static final int POPULATION_SIZE = 100;
+    private static final int POPULATION_SIZE = 10;
     private static final int HEURISTIC_COUNT = 5;
     private static final int LOWER = -100;
     private static final int UPPER = -1;
@@ -30,21 +30,23 @@ public class Blacksmith {
     private void geneticAlgorithm () {
         //Initialising a new population
         State[] population = new State[POPULATION_SIZE], nextPop = new State[POPULATION_SIZE];
-        int maxScore = 0, totalScore = 0;
+        int totalScore = 0, prevScore = 0;
 
         for (int i = 0; i < POPULATION_SIZE; i++) {
             population[i] = State.randomState();
         }
 
+        State bestState = population[0];
         State[] parents = new State[2];
         while (true) {
+            prevScore = totalScore;
             totalScore = 0;
             //Printing Population scores
             System.out.print("Population Scores: [");
             for (int i = 0; i < POPULATION_SIZE; i++) {
                 System.out.print(population[i].getScore());
-                if (population[i].getScore()>population[maxScore].getScore())
-                    maxScore = i;
+                if (population[i].getScore()>bestState.getScore())
+                    bestState = population[i];
                 totalScore += population[i].getScore();
                 if (i == POPULATION_SIZE - 1) break;
                 System.out.print(", ");
@@ -56,7 +58,7 @@ public class Blacksmith {
             //Printing best player
             System.out.print("Best Player: [");
             for (int i = 0; i<HEURISTIC_COUNT; i++){
-                System.out.print(population[maxScore].getValues()[i]);
+                System.out.print(bestState.getValues()[i]);
                 if (i == HEURISTIC_COUNT-1) break;
                 System.out.print(", ");
             }
@@ -75,7 +77,7 @@ public class Blacksmith {
                     else if (randomizer.nextDouble() * population[i].getScore() > randomizer.nextDouble() * parents[1].getScore())
                         parents[1] = population[i];
                 }
-                nextPop[j] = nextGeneration(parents);
+                nextPop[j] = nextGeneration(parents, prevScore, totalScore);
             }
             population = nextPop;
         }
@@ -104,14 +106,14 @@ public class Blacksmith {
     }*/
 
     //Parents should be arranged in decreasing weight order.
-    private State nextGeneration(State[] parents){
+    private State nextGeneration(State[] parents, int prev, int curr){
         int[] heuristic = new int[HEURISTIC_COUNT];
 
         for (int i = 0; i<HEURISTIC_COUNT; i++) {
             if (parents[0].getScore() * randomizer.nextDouble() >= parents[1].getScore() * randomizer.nextDouble()) {
                 heuristic[i] = parents[0].getValues()[i];
             } else heuristic[i] = parents[1].getValues()[i];
-            if (randomizer.nextInt(101) <= randomizer.nextInt(101)) {
+            if (randomizer.nextDouble()<(randomizer.nextDouble()*prev/curr)) {
                 heuristic[i] = heuristic[i] + randomizer.nextInt(100) - randomizer.nextInt(100);
             }
             if (heuristic[i] < LOWER) heuristic[i] = -100;
