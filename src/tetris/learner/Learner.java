@@ -9,12 +9,13 @@ public class Learner {
 
 	private static final int CLOCK = 1000;
 	private static final int NUMBER_OF_HEURISTICS = 7;
-	private static final int MINIMUM_MUTATION = 3;	
+	private static final int MINIMUM_MUTATION = 3;
 	private static final int NUMBER_OF_RUNS = 20;
 	private static final int MAX_REPEATS = 5;
 	private static Random randomizer = new Random();
 
 	private double[] bestRatio = new double[NUMBER_OF_HEURISTICS];
+	private double[] prevRatio = {0.5811005086815347, 0.6732932788752304, 0.1593129551063973, 1.1324943440833426, 0.27685699434549205, -0.015314259060849267, 0.11397418910816315};
 	private int bestScore = 0;
 	private int logger = 0;
 
@@ -29,6 +30,11 @@ public class Learner {
 		double[] ratio3 = new double[NUMBER_OF_HEURISTICS];
 		double[] ratio4 = new double[NUMBER_OF_HEURISTICS];
 		double[] ratio5 = new double[NUMBER_OF_HEURISTICS];
+		if (prevRatio == null) {
+			ratio1 = randomRatio();
+		} else {
+			System.arraycopy(prevRatio, 0, ratio1, 0, NUMBER_OF_HEURISTICS);
+		}
 		ratio1 = randomRatio();
 		updateBest(ratio1);
 		int count = CLOCK;
@@ -78,7 +84,7 @@ public class Learner {
 	private double[] mutation(double[] ratio, int type) {
 		int[] slot = new int[randomizer.nextInt(NUMBER_OF_HEURISTICS-MINIMUM_MUTATION)+MINIMUM_MUTATION];
 		for (int i=0;i<slot.length;i++) {
-			slot[i] = randomizer.nextInt(NUMBER_OF_HEURISTICS-MINIMUM_MUTATION-1)+MINIMUM_MUTATION;
+			slot[i] = randomizer.nextInt(NUMBER_OF_HEURISTICS-MINIMUM_MUTATION)+MINIMUM_MUTATION;
 		}
 		double mutator = randomizer.nextDouble();
 		double[] temp = new double[NUMBER_OF_HEURISTICS];
@@ -111,7 +117,7 @@ public class Learner {
 
 	private void printArray(double[] ratio) {
 		for (int i=0;i<ratio.length;i++) {
-			System.out.print(ratio[i]+" ");
+			System.out.print(ratio[i]+", ");
 		}
 		System.out.println();
 	}
