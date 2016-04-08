@@ -71,6 +71,11 @@ public class StateAnalyser {
             if (currentColHeight < lowestRow) {
                 lowestRow = currentColHeight;
             }
+            // Return losing move is height is more than what is allowed
+            if (currentColHeight >= State.ROWS) {
+                return AnalysisResult.losingMove(move);
+            }
+
             // Then add on to the aggregate height
             metrics[INDEX_METRIC_AGGREGATE_HEIGHT] += currentColHeight;
 

@@ -1,6 +1,4 @@
-import java.util.Arrays;
 import java.util.Random;
-import java.util.concurrent.CountDownLatch;
 import java.util.function.Function;
 
 /**
@@ -8,7 +6,7 @@ import java.util.function.Function;
  */
 public class SimulatedAnnealing implements LearningMethod {
 
-    private static final double HEURISTICS_MUTATION = (Heuristics.UPPER_BOUND - Heuristics.LOWER_BOUND) / 100;
+    private static final double HEURISTICS_MUTATION = (Heuristics.UPPER_BOUND - Heuristics.LOWER_BOUND) / 1000000;
     private static final int COUNT_BENCHMARKS = 100;
     private static final int CLOCK = 1000;
 

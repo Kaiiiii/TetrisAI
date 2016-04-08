@@ -69,6 +69,6 @@ public class Heuristics {
 
     public String fullString() {
         return String.join(", ", Arrays.stream(this._coefficients).mapToObj(Double::toString)
-                .collect(Collectors.toList()).toArray(new String[0]));
+                .toArray(String[]::new));
     }
 }

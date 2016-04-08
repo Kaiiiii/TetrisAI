@@ -19,11 +19,11 @@ public class Learner {
         while (true) {
             Heuristics heuristics = method.learn();
             double score = new Benchmarker(heuristics).benchmark(1000);
-            if (score > 1000.0) {
-                writer.write(heuristics.fullString());
-                writer.newLine();
-                writer.flush();
-            }
+            writer.write(heuristics.fullString());
+            writer.newLine();
+            writer.write(Double.toString(score));
+            writer.newLine();
+            writer.flush();
         }
     }
 }

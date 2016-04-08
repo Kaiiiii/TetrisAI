@@ -4,20 +4,20 @@ public class PlayerSkeleton {
 
     private static final int DELAY_PLACE = 10;
     private static final Heuristics HEURISTICS_DEFAULT = new Heuristics(
-            -.510066,
-            .760666,
-            -.35663,
-            -.184483
+//            -0.510066, 0.760666, -0.35663, -0.184483
+            -0.9635067495559927, 0.5900638947967912, -0.010675920224679562, -0.13982186073511282
     );
 
     // implement this function to have a working system
     public int pickMove(State s, int[][] legalMoves) {
         StateAnalyser analyser = new StateAnalyser(s);
-        return IntStream.range(0, legalMoves.length).parallel()
+        AnalysisResult winningMove = IntStream.range(0, legalMoves.length).parallel()
                 .mapToObj(analyser::analyse)
+                .filter(move -> !move.isLosingMove())
                 .max((a1, a2) -> HEURISTICS_DEFAULT.calculate(a1).compareTo(HEURISTICS_DEFAULT.calculate(a2)))
-                .get()
-                .getMoveIndex();
+                .orElse(null);
+        if (winningMove == null) return 0;
+        return winningMove.getMoveIndex();
     }
 
     public static void main(String[] args) {
