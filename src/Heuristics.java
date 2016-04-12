@@ -6,9 +6,13 @@ import java.util.Random;
  */
 public class Heuristics {
 
-    private static final int COUNT_HEURISTICS = 4;
+    // Bounds
+    public static final int COUNT_HEURISTICS = 5;
     public static final double LOWER_BOUND = 0.0;
     public static final double UPPER_BOUND = 1.0;
+
+    // Result of last played game
+    private double result = 0;
 
     private double[] _coefficients;
 
@@ -54,7 +58,8 @@ public class Heuristics {
         return new Heuristics(newHeuristics);
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         StringBuilder sb = new StringBuilder();
         Arrays.stream(this._coefficients).mapToObj(value -> String.format("%.3f", value))
                 .forEachOrdered(valueString -> {
@@ -70,5 +75,55 @@ public class Heuristics {
         return String.join(", ", (CharSequence[]) Arrays.stream(this._coefficients)
                 .mapToObj(Double::toString)
                 .toArray(String[]::new));
+    }
+
+    /**
+     * betterThan compares the last game results between 2 heuristics and return the comparison.
+     *
+     * @param localBest
+     * @return
+     */
+    public boolean betterThan(Heuristics localBest) {
+        return this.result > localBest.result;
+    }
+
+    /**
+     * setVelocity sets the direction and scalar change, given another better particle
+     *
+     * @param betterParticle
+     */
+    public void setVelocity(Heuristics betterParticle) {
+        //TODO: Implement velocity equations with some randomness
+    }
+
+    /**
+     * setPosition edits the heuristics coefficients based on the velocity or vector suggested.
+     */
+    public void setPosition() {
+        //TODO: Implement change in position w.r.t velocity vectors
+
+    }
+
+    /**
+     * flockTo directs this particle towards the better particle, with some randomness in the amount moved.
+     *
+     * @param localBest
+     */
+    public void flockTo(Heuristics localBest) {
+
+        // ... set Velocity
+        setVelocity(localBest);
+
+        // ... set Position
+        setPosition();
+    }
+
+    /**
+     * updateResult updates the result field with the result of the last game played using this heuristics
+     *
+     * @param result
+     */
+    public void updateResult(double result) {
+        this.result = result;
     }
 }

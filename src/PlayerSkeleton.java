@@ -8,11 +8,10 @@ public class PlayerSkeleton {
 //            -0.9635067495559927, 0.5900638947967912, -0.010675920224679562, -0.13982186073511282
 //    );
 
-
+    // AggregateHeight |    CompleteLines   |      HolesCount     |     Bumpiness      |     LandingHeight
     private static final Heuristics HEURISTICS_DEFAULT = new Heuristics(
-          // AggregateHeight |    CompleteLines   |      HolesCount     |     Bumpiness      |     LandingHeight
             -0.9635067495559927, 0.5900638947967912, -0.010675920224679562, -0.13982186073511282, -0.500158825082766
-  );
+    );
 
     // implement this function to have a working system
     public int pickMove(State s, int[][] legalMoves) {
