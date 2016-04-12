@@ -2,10 +2,12 @@ import java.util.stream.IntStream;
 
 public class PlayerSkeleton {
 
-    private static final int DELAY_PLACE = 10;
+    private static final int DELAY_PLACE = 1;
     private static final Heuristics HEURISTICS_DEFAULT = new Heuristics(
-//            -0.510066, 0.760666, -0.35663, -0.184483
-            -0.9635067495559927, 0.5900638947967912, -0.010675920224679562, -0.13982186073511282
+            0.025447084296227995, // Height
+            0.6576589572714789, // Cleared
+            0.8390092702535551, // Holes
+            0.1990402741152839 // Bumpiness
     );
 
     // implement this function to have a working system

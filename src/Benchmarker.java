@@ -31,4 +31,14 @@ public class Benchmarker {
                 .max((a1, a2) -> this._heuristics.calculate(a1).compareTo(this._heuristics.calculate(a2)))
                 .get().getMoveIndex();
     }
+
+    public static void main(String[] args) {
+        Heuristics h = new Heuristics(
+                -0.025447084296227995, // Height
+                0.6576589572714789, // Rows cleared
+                -0.8390092702535551, // Holes
+                -0.1990402741152839 // Bumpiness
+        );
+        System.out.println(new Benchmarker(h).benchmark(1000));
+    }
 }

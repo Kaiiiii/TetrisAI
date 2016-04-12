@@ -40,7 +40,7 @@ public class AnalysisResult {
         return this._aggregateHeight;
     }
 
-    public int getCompleteLines() {
+    public int getCompleteRows() {
         return this._completeLines;
     }
 
