@@ -1,137 +1,241 @@
-import java.util.Arrays;
 import java.util.stream.IntStream;
 
 public class StateAnalyser {
-    private static final int COUNT_METRICS = 4;
-    private static final int INDEX_METRIC_AGGREGATE_HEIGHT = 0;
-    private static final int INDEX_METRIC_COMPLETE_LINES = 1;
-    private static final int INDEX_METRIC_HOLES = 2;
-    private static final int INDEX_METRIC_BUMPINESS = 3;
 
     /**
      * Fields
      */
     private final State _state;
+    private final int _piece;
+
+    private final int _moveId;
+    private final int _orient;
+    private final int _slot;
+
+    private final int _base;
 
     /**
      * Constructs a new field analyst
      */
-    public StateAnalyser(State state) {
-        this._state = state;
+    public StateAnalyser(State state, int moveId) {
+        _state = state;
+        _piece = state.getNextPiece();
+
+        _moveId = moveId;
+        _orient = State.legalMoves[_piece][moveId][State.ORIENT];
+        _slot = State.legalMoves[_piece][moveId][State.SLOT];
+
+        _base = this.getBase();
     }
-    
-    public AnalysisResult analyse(int move) {
-        int[] moveData = this._state.legalMoves()[move];
 
-        // Get the orientation and column of the move
-        int orient = moveData[State.ORIENT];
-        int column = moveData[State.SLOT];
+    public AnalysisResult analyse() {
+        // Prepare results
+        final int[] heuristics = new int[Heuristics.COUNT];
 
-        // Get the width of the piece
-        int pieceWidth = State.getpWidth()[this._state.getNextPiece()][orient];
-        
-        // Find out the base
-        int base = IntStream.range(0, pieceWidth)
-                .map(index -> this._state.getTop()[column + index] -
-                        State.getpBottom()[this._state.getNextPiece()][orient][index])
+        // Get height of new move
+        int maxHeight = IntStream.range(0, getPieceWidth())
+                .map(pieceCol -> pieceCol + _slot)
+                .map(this::getVirtualHeight)
+                .max().getAsInt();
+        if (maxHeight >= State.ROWS) {
+            return AnalysisResult.losingMove(_moveId);
+        }
+
+        // LANDING HEIGHT
+        heuristics[Heuristics.ID_LANDING_HEIGHT] = this.calculateLandingHeight();
+
+        // ROWS ELIMINATED
+        heuristics[Heuristics.ID_ROWS_ELIMINATED] = this.calculateRowsEliminated();
+
+        // ROW TRANSITIONS
+        heuristics[Heuristics.ID_ROW_TRANSITIONS] = this.calculateRowTransitions();
+
+        // COL TRANSITIONS
+        heuristics[Heuristics.ID_COLUMN_TRANSITIONS] = this.calculateColTransitions();
+
+        // NUMBER OF HOLES
+        heuristics[Heuristics.ID_HOLES_COUNT] = this.calculateHolesCount();
+
+        // WELL SUMS
+        heuristics[Heuristics.ID_WELL_SUMS] = this.calculateWellSums();
+
+        return new AnalysisResult(_moveId, heuristics);
+    }
+
+    private int getBase() {
+        return IntStream.range(0, getPieceWidth())
+                .map(index -> _state.getTop()[_slot + index] - getPieceBottom(index))
                 .max().orElse(0);
-
-        // Get new tops/heights
-        final int[] newTop = new int[pieceWidth];
-        IntStream.range(0, pieceWidth)
-                .forEach(index -> {
-                    newTop[index] = State.getpTop()[this._state.getNextPiece()][orient][index] +
-                            base;
-                });
-
-        // Prepare metrics
-        final int[] metrics = new int[COUNT_METRICS];
-
-        // Find out number of holes of special columns
-        metrics[INDEX_METRIC_HOLES] = IntStream.range(0, pieceWidth)
-                .map(index -> base + State.getpBottom()[this._state.getNextPiece()][orient][index] -
-                        this._state.getTop()[column + index])
-                .sum();
-
-
-        // Keep track of lowest column for checking of complete rows
-        int lowestRow = State.ROWS - 1;
-
-        // Keep track of previous column's height
-        Integer previousColHeight = null;
-
-        // Okay, now for all other columns, run normal aggregate
-        for (int col = 0; col < State.COLS; col++) {
-            final int currentCol = col;
-            // AGGREGATE HEIGHT
-            // We want to get the current column's height first
-            int currentColHeight = (col < column || col >= column + pieceWidth) ?
-                    this._state.getTop()[col] : newTop[col - column];
-            // Update the lowest row along the way
-            if (currentColHeight < lowestRow) {
-                lowestRow = currentColHeight;
-            }
-            // Return losing move is height is more than what is allowed
-            if (currentColHeight >= State.ROWS) {
-                return AnalysisResult.losingMove(move);
-            }
-
-            // Then add on to the aggregate height
-            metrics[INDEX_METRIC_AGGREGATE_HEIGHT] += currentColHeight;
-
-            // HOLES
-            // The holes of the special columns were already taken into account above
-            // we only count the rest here
-            metrics[INDEX_METRIC_HOLES] += IntStream.range(0, this._state.getTop()[currentCol])
-                    .parallel()
-                    .filter(row -> this._state.getField()[row][currentCol] == 0)
-                    .count();
-
-            // BUMPINESS
-            // If the previous col height is null, then there isn't any value yet,
-            // we just assign the current height to it and skip
-            if (previousColHeight == null) {
-                previousColHeight = currentColHeight;
-                continue;
-            }
-            metrics[INDEX_METRIC_BUMPINESS] += Math.abs(currentColHeight - previousColHeight);
-            previousColHeight = currentColHeight;
-        }
-
-        // Now, calculate the number of completed rows
-        // If base row is below the lowest row, there is none, so we don't consider this case
-        // We will try to measure the rows in which they are both affected by the placing, and
-        // also higher than the lowest row
-        for (int row = base; row < lowestRow; row++) {
-            final int currentRow = row;
-            // Filter out unaffected columns, if they contains an empty cell then we can skip
-            // right away
-            int emptyCells = (int) IntStream.range(0, State.COLS).parallel()
-                    .filter(col -> col < column || col >= column + pieceWidth)
-                    .filter(col -> this._state.getField()[currentRow][col] == 0)
-                    .count();
-            if (emptyCells > 0) {
-                continue;
-            }
-
-            // Try to calculate if there is any hole here
-            emptyCells = (int) IntStream.range(0, pieceWidth).parallel()
-                    .map(index -> currentRow - base - State.getpBottom()[this._state.getNextPiece()][orient][index])
-                    .filter(value -> value < 0)
-                    .count();
-            if (emptyCells > 0) {
-                continue;
-            }
-
-            // No holes, increment count of filled cells
-            metrics[INDEX_METRIC_COMPLETE_LINES]++;
-        }
-
-        return new AnalysisResult(move,
-                metrics[INDEX_METRIC_AGGREGATE_HEIGHT],
-                metrics[INDEX_METRIC_COMPLETE_LINES],
-                metrics[INDEX_METRIC_HOLES],
-                metrics[INDEX_METRIC_BUMPINESS]);
     }
 
+    private int calculateLandingHeight() {
+        return _base + (this.getPieceHeight() - 1) / 2;
+    }
+
+    private int calculateRowsEliminated() {
+        int lowestRow = IntStream.range(0, State.COLS)
+                .map(this::getVirtualHeight)
+                .min().getAsInt();
+        return (int) IntStream.range(0, lowestRow)
+                .filter(row -> IntStream.range(0, State.COLS)
+                        .filter(col -> hasCellAt(row, col))
+                        .count() == 0)
+                .count();
+    }
+
+    private int calculateRowTransitions() {
+        int highestRow = IntStream.range(0, State.COLS)
+                .map(this::getVirtualHeight)
+                .max().getAsInt();
+        return IntStream.range(0, highestRow)
+                .map(row -> {
+                    int transitions = 0;
+                    for (int col = 1; col < State.COLS; col++) {
+                        if (hasCellAt(row, col) ^ hasCellAt(row, col-1)) {
+                            transitions++;
+                        }
+                    }
+                    return transitions;
+                })
+                .sum();
+    }
+
+    private int calculateColTransitions() {
+        return IntStream.range(0, State.COLS)
+                .map(col -> {
+                    int transitions = 0;
+                    int rowHeight = getVirtualHeight(col);
+                    for (int row = 0; row <= rowHeight; row++) {
+                        if (hasCellAt(row, col) ^ hasCellAt(row + 1, col)) {
+                            transitions++;
+                        }
+                    }
+                    return transitions;
+                })
+                .sum();
+    }
+
+    private int calculateHolesCount() {
+        return IntStream.range(0, State.COLS)
+                .map(col -> {
+                    int holes = 0;
+                    int rowHeight = getVirtualHeight(col);
+                    for (int row = 0; row < rowHeight - 1; row++) {
+                        if (!hasCellAt(row, col)) {
+                            holes++;
+                        }
+                    }
+                    return holes;
+                })
+                .sum();
+    }
+
+    private int calculateWellSums() {
+        int innerWellSums = IntStream.range(1, State.COLS - 1)
+                .map(col -> {
+                    int wellSize = 0;
+                    int rowHeight = getVirtualHeight(col);
+                    for (int row = rowHeight; row < State.ROWS; row++) {
+                        if (!hasCellAt(row, col) && hasCellAt(row, col - 1) && hasCellAt(row, col + 1)) {
+                            wellSize++;
+
+                            // Keep counting from this cell downwards
+                            for (int i = row - 1; i >= 0; i--) {
+                                if (!hasCellAt(i, col)) {
+                                    wellSize++;
+                                } else {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    return wellSize;
+                }).sum();
+
+        int leftWellSums = 0;
+        int firstColHeight = getVirtualHeight(0);
+        for (int row = firstColHeight; row < State.ROWS; row++) {
+            if (!hasCellAt(row, 0) && hasCellAt(row, 1)) {
+                leftWellSums++;
+
+                // Keep counting from this cell downwards
+                for (int i = row - 1; i >= 0; i--) {
+                    if (!hasCellAt(i, 0)) {
+                        leftWellSums++;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+
+        int rightWellSums = 0;
+        int lastCol = State.COLS - 1;
+        int lastColHeight = getVirtualHeight(lastCol);
+        for (int row = lastColHeight; row < State.ROWS; row++) {
+            if (!hasCellAt(row, lastCol) && hasCellAt(row, lastCol - 1)) {
+                rightWellSums++;
+
+                // Keep counting from this cell downwards
+                for (int i = row - 1; i >= 0; i--) {
+                    if (!hasCellAt(i, lastCol)) {
+                        rightWellSums++;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+
+        return innerWellSums + leftWellSums + rightWellSums;
+    }
+
+    private int getPieceTop(int pieceCol) {
+        return State.getpTop()[_piece][_orient][pieceCol];
+    }
+
+    private int getPieceBottom(int pieceCol) {
+        return State.getpBottom()[_piece][_orient][pieceCol];
+    }
+
+    private int getPieceWidth() {
+        return State.getpWidth()[_piece][_orient];
+    }
+
+    private int getPieceHeight() {
+        return State.getpHeight()[_piece][_orient];
+    }
+
+    private int getVirtualHeight(int column) {
+        if (!isAffectedColumn(column)) {
+            return _state.getTop()[column];
+        }
+        return _base + getPieceTop(column - _slot);
+    }
+
+    private boolean hasCellAt(int row, int col) {
+        // More than height, nothing is here
+        if (row >= getVirtualHeight(col)) {
+            return false;
+        }
+        // If the old field has it there, it will still be there
+        // in the context of this function
+        if (_state.getField()[row][col] > 0) {
+            return true;
+        }
+        // If outside of the affected area, and still it has nothing
+        // here, then it will not have anything there anyway
+        if (!isAffectedColumn(col) || row < _base) {
+            return false;
+        }
+
+        // Now we can besure that it's within affected area
+        col -= _slot;
+        row -= _base;
+        return row >= getPieceBottom(col);
+    }
+
+    private boolean isAffectedColumn(int column) {
+        return column >= _slot && column < _slot + getPieceWidth();
+    }
 }

@@ -25,9 +25,9 @@ public class Benchmarker {
     }
 
     private int pickMove(State s) {
-        final StateAnalyser analyser = new StateAnalyser(s);
         return IntStream.range(0, s.legalMoves().length).parallel()
-                .mapToObj(analyser::analyse)
+                .mapToObj(moveId -> new StateAnalyser(s, moveId))
+                .map(StateAnalyser::analyse)
                 .max((a1, a2) -> this._heuristics.calculate(a1).compareTo(this._heuristics.calculate(a2)))
                 .get().getMoveIndex();
     }

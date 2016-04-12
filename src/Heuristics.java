@@ -6,30 +6,46 @@ import java.util.Random;
  */
 public class Heuristics {
 
-    private static final int COUNT_HEURISTICS = 4;
+    /**
+     * Constants
+     */
+
     public static final double LOWER_BOUND = 0.0;
     public static final double UPPER_BOUND = 1.0;
 
+    public static final int COUNT = 6;
+    public static final int ID_LANDING_HEIGHT     = 0;
+    public static final int ID_ROWS_ELIMINATED    = 1;
+    public static final int ID_ROW_TRANSITIONS    = 2;
+    public static final int ID_COLUMN_TRANSITIONS = 3;
+    public static final int ID_HOLES_COUNT        = 4;
+    public static final int ID_WELL_SUMS          = 5;
+
+    /**
+     * Properties
+     */
     private double[] _coefficients;
 
     public Heuristics(double... coefficients) {
-        assert coefficients.length == COUNT_HEURISTICS;
+        assert coefficients.length == COUNT;
         this._coefficients = coefficients;
     }
 
     public Double calculate(AnalysisResult result) {
-        return -this._coefficients[0] * result.getAggregateHeight() +
-                this._coefficients[1] * result.getCompleteRows() +
-                -this._coefficients[2] * result.getHolesCount() +
-                -this._coefficients[3] * result.getBumpiness();
+        return this._coefficients[ID_LANDING_HEIGHT] * result.getLandingHeight() +
+                this._coefficients[ID_ROWS_ELIMINATED] * result.getRowsEliminated() +
+                this._coefficients[ID_ROW_TRANSITIONS] * result.getRowTransitions() +
+                this._coefficients[ID_COLUMN_TRANSITIONS] * result.getColTransitions() +
+                this._coefficients[ID_HOLES_COUNT] * result.getHolesCount() +
+                this._coefficients[ID_WELL_SUMS] * result.getWellSums();
     }
 
     public static Heuristics randomHeuristics() {
         Random randomizer = new Random();
         double stretch = UPPER_BOUND - LOWER_BOUND;
-        double[] coefficients = new double[COUNT_HEURISTICS];
+        double[] coefficients = new double[COUNT];
 
-        for (int i = 0; i < COUNT_HEURISTICS; i++) {
+        for (int i = 0; i < COUNT; i++) {
             coefficients[i] = randomizer.nextDouble() * stretch + LOWER_BOUND;
         }
 
@@ -38,9 +54,9 @@ public class Heuristics {
 
     public Heuristics mutateHeuristics(double mutation) {
         Random randomizer = new Random();
-        int valueToMutate = randomizer.nextInt(COUNT_HEURISTICS);
-        double[] newHeuristics = new double[COUNT_HEURISTICS];
-        System.arraycopy(this._coefficients, 0, newHeuristics, 0, COUNT_HEURISTICS);
+        int valueToMutate = randomizer.nextInt(COUNT);
+        double[] newHeuristics = new double[COUNT];
+        System.arraycopy(this._coefficients, 0, newHeuristics, 0, COUNT);
 
         boolean toIncrease = randomizer.nextBoolean();
         newHeuristics[valueToMutate] += mutation * (toIncrease ? 1 : -1);
