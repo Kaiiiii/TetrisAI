@@ -19,7 +19,7 @@ public class Heuristics {
 
     public Double calculate(AnalysisResult result) {
         return this._coefficients[0] * result.getAggregateHeight() +
-                this._coefficients[1] * result.getCompleteLines() +
+                this._coefficients[1] * result.getCompleteRows() +
                 this._coefficients[2] * result.getHolesCount() +
                 this._coefficients[3] * result.getBumpiness() +
                 this._coefficients[4] * result.getLandingHeight();
