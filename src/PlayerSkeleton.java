@@ -7,8 +7,8 @@ public class PlayerSkeleton {
 ////            -0.510066, 0.760666, -0.35663, -0.184483
 //            -0.9635067495559927, 0.5900638947967912, -0.010675920224679562, -0.13982186073511282
 //    );
-    
-    
+
+
     private static final Heuristics HEURISTICS_DEFAULT = new Heuristics(
           // AggregateHeight |    CompleteLines   |      HolesCount     |     Bumpiness      |     LandingHeight
           -0.9635067495559927, 0.5900638947967912, -0.010675920224679562, -0.13982186073511282, -0.400158825082766

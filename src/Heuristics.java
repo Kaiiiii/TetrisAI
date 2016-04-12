@@ -1,6 +1,5 @@
 import java.util.Arrays;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 /**
  * Created by maianhvu on 5/4/16.
@@ -8,7 +7,7 @@ import java.util.stream.Collectors;
 public class Heuristics {
 
     private static final int COUNT_HEURISTICS = 4;
-    public static final double LOWER_BOUND = -1.0;
+    public static final double LOWER_BOUND = 0.0;
     public static final double UPPER_BOUND = 1.0;
 
     private double[] _coefficients;
@@ -28,12 +27,11 @@ public class Heuristics {
 
     public static Heuristics randomHeuristics() {
         Random randomizer = new Random();
-        double stretch = (UPPER_BOUND - LOWER_BOUND) / 2;
+        double stretch = UPPER_BOUND - LOWER_BOUND;
         double[] coefficients = new double[COUNT_HEURISTICS];
 
         for (int i = 0; i < COUNT_HEURISTICS; i++) {
             coefficients[i] = randomizer.nextDouble() * stretch + LOWER_BOUND;
-            if (i == 1) coefficients[i] *= -1;
         }
 
         return new Heuristics(coefficients);
@@ -69,7 +67,8 @@ public class Heuristics {
     }
 
     public String fullString() {
-        return String.join(", ", Arrays.stream(this._coefficients).mapToObj(Double::toString)
+        return String.join(", ", (CharSequence[]) Arrays.stream(this._coefficients)
+                .mapToObj(Double::toString)
                 .toArray(String[]::new));
     }
 }
