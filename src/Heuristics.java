@@ -22,7 +22,8 @@ public class Heuristics {
         return this._coefficients[0] * result.getAggregateHeight() +
                 this._coefficients[1] * result.getCompleteLines() +
                 this._coefficients[2] * result.getHolesCount() +
-                this._coefficients[3] * result.getBumpiness();
+                this._coefficients[3] * result.getBumpiness() +
+                this._coefficients[4] * result.getLandingHeight();
     }
 
     public static Heuristics randomHeuristics() {

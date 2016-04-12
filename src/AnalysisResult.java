@@ -9,6 +9,7 @@ public class AnalysisResult {
     private final int _completeLines;
     private final int _holesCount;
     private final int _bumpiness;
+    private final int _landingHeight;
     private boolean _isLosingMove;
 
     // Cached calculated value
@@ -23,12 +24,13 @@ public class AnalysisResult {
      * @param bumpiness
      */
     public AnalysisResult(int moveIndex, int aggregateHeight, int completedLines,
-                          int holesCount, int bumpiness) {
+                          int holesCount, int bumpiness, int landingHeight) {
         this._moveIndex = moveIndex;
         this._aggregateHeight = aggregateHeight;
         this._completeLines = completedLines;
         this._holesCount = holesCount;
         this._bumpiness = bumpiness;
+        this._landingHeight = landingHeight;
         this._isLosingMove = false;
     }
 
@@ -51,6 +53,11 @@ public class AnalysisResult {
     public int getBumpiness() {
         return this._bumpiness;
     }
+    
+    public int getLandingHeight() {
+        return this._landingHeight;
+    }
+
 
     // Losing move constructor
     private AnalysisResult(int moveId) {
@@ -61,6 +68,7 @@ public class AnalysisResult {
         this._completeLines = Integer.MIN_VALUE;
         this._holesCount = Integer.MAX_VALUE;
         this._bumpiness = Integer.MAX_VALUE;
+        this._landingHeight = Integer.MAX_VALUE;
     }
 
     public static AnalysisResult losingMove(int moveId) {
