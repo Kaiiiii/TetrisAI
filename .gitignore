@@ -55,3 +55,5 @@ local.properties
 .idea/
 
 /data/
+
+.classpath
