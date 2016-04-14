@@ -7,8 +7,8 @@ import java.util.function.Function;
 public class SimulatedAnnealing implements LearningMethod {
 
     private static final double HEURISTICS_MUTATION = (Heuristics.UPPER_BOUND - Heuristics.LOWER_BOUND) / 1000000;
-    private static final int COUNT_BENCHMARKS = 100;
-    private static final int CLOCK = 1000;
+    private static final int COUNT_BENCHMARKS = 2;
+    private static final int CLOCK = 2000;
 
     public Heuristics learn() {
         Heuristics initial = Heuristics.randomHeuristics();

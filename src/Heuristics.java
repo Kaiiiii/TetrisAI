@@ -11,7 +11,7 @@ public class Heuristics {
      */
 
     public static final double LOWER_BOUND = 0.0;
-    public static final double UPPER_BOUND = 1.0;
+    public static final double UPPER_BOUND = 10.0;
 
     public static final int COUNT = 6;
     public static final int ID_LANDING_HEIGHT     = 0;
@@ -32,12 +32,12 @@ public class Heuristics {
     }
 
     public Double calculate(AnalysisResult result) {
-        return this._coefficients[ID_LANDING_HEIGHT] * result.getLandingHeight() +
+        return -this._coefficients[ID_LANDING_HEIGHT] * result.getLandingHeight() +
                 this._coefficients[ID_ROWS_ELIMINATED] * result.getRowsEliminated() +
-                this._coefficients[ID_ROW_TRANSITIONS] * result.getRowTransitions() +
-                this._coefficients[ID_COLUMN_TRANSITIONS] * result.getColTransitions() +
-                this._coefficients[ID_HOLES_COUNT] * result.getHolesCount() +
-                this._coefficients[ID_WELL_SUMS] * result.getWellSums();
+                -this._coefficients[ID_ROW_TRANSITIONS] * result.getRowTransitions() +
+                -this._coefficients[ID_COLUMN_TRANSITIONS] * result.getColTransitions() +
+                -this._coefficients[ID_HOLES_COUNT] * result.getHolesCount() +
+                -this._coefficients[ID_WELL_SUMS] * result.getWellSums();
     }
 
     public static Heuristics randomHeuristics() {
@@ -70,15 +70,9 @@ public class Heuristics {
     }
 
     @Override public String toString() {
-        StringBuilder sb = new StringBuilder();
-        Arrays.stream(this._coefficients).mapToObj(value -> String.format("%.3f", value))
-                .forEachOrdered(valueString -> {
-                    if (sb.length() != 0) {
-                        sb.append(", ");
-                    }
-                    sb.append(valueString);
-                });
-        return sb.toString();
+        return String.join(", ", (CharSequence[]) Arrays.stream(this._coefficients)
+                .mapToObj(coef -> String.format("%.4f", coef))
+                .toArray(String[]::new));
     }
 
     public String fullString() {

@@ -18,12 +18,15 @@ public class Learner {
 
         while (true) {
             Heuristics heuristics = method.learn();
-            double score = new Benchmarker(heuristics).benchmark(1000);
+            double score = new Benchmarker(heuristics).benchmark(10);
             writer.write(heuristics.fullString());
             writer.newLine();
             writer.write(Double.toString(score));
             writer.newLine();
             writer.flush();
+            System.out.printf("Agent [%s] earned %.0f points!",
+                    heuristics.fullString(),
+                    score);
         }
     }
 }

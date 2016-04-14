@@ -25,11 +25,14 @@ public class Benchmarker {
     }
 
     private int pickMove(State s) {
-        return IntStream.range(0, s.legalMoves().length).parallel()
+        AnalysisResult result = IntStream.range(0, s.legalMoves().length).parallel()
                 .mapToObj(moveId -> new StateAnalyser(s, moveId))
                 .map(StateAnalyser::analyse)
+                .filter(move -> !move.isLosingMove())
                 .max((a1, a2) -> this._heuristics.calculate(a1).compareTo(this._heuristics.calculate(a2)))
-                .get().getMoveIndex();
+                .orElse(null);
+        if (result == null) return 0;
+        return result.getMoveIndex();
     }
 
     public static void main(String[] args) {
