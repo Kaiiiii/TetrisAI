@@ -31,6 +31,14 @@ public class Heuristics {
         this._coefficients = coefficients;
     }
 
+    public double[] getValues() {
+        return this._coefficients;
+    }
+
+    public void setValues(double... coefficients) {
+        this._coefficients = coefficients;
+    }
+
     public Double calculate(AnalysisResult result) {
         return -this._coefficients[ID_LANDING_HEIGHT] * result.getLandingHeight() +
                 this._coefficients[ID_ROWS_ELIMINATED] * result.getRowsEliminated() +
