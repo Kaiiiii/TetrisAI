@@ -7,7 +7,7 @@ import java.util.function.Function;
  * Created by maianhvu on 28/03/2016.
  */
 public class Blacksmith {
-    private static final int POPULATION_SIZE = 10;
+    private static final int POPULATION_SIZE = 100;
     private static final int HEURISTIC_COUNT = 5;
     private static final int LOWER = -100;
     private static final int UPPER = -1;

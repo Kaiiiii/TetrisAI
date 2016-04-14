@@ -11,9 +11,9 @@ public class UniversalPlayer extends HeuristicsPlayer {
     @Override
     protected double calculateHeuristics(Analysis analysis) {
         return -100.0 * analysis.getAggregateHeight() +
-                -18.0 * analysis.getRoughness() +
-                -1.0 * analysis.getHolesCount() +
-                -100.0 * analysis.getCellsCount() +
+                -38.0 * analysis.getRoughness() +
+                -100.0 * analysis.getHolesCount() +
+                -1.0 * analysis.getCellsCount() +
                 -1.0 * analysis.getHighestSlope();
     }
 }
