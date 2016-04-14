@@ -8,16 +8,17 @@ import java.io.FileWriter;
 public class Learner {
 
     protected static LearningMethod selectLearningMethod() {
-        return new SimulatedAnnealing();
+        return new ParticleSwarmOptimisation();
     }
 
     public static void main(String[] args) throws Exception {
         (new File("data")).mkdirs();
         LearningMethod method = selectLearningMethod();
-        BufferedWriter writer = new BufferedWriter(new FileWriter("data/learn.txt"));
+        BufferedWriter writer = new BufferedWriter(new FileWriter("data/pso.txt"));
 
         while (true) {
             Heuristics heuristics = method.learn();
+            if (heuristics == null) break;
             double score = new Benchmarker(heuristics).benchmark(10);
             writer.write(heuristics.fullString());
             writer.newLine();
