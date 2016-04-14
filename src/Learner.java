@@ -8,7 +8,7 @@ import java.io.FileWriter;
 public class Learner {
 
     protected static LearningMethod selectLearningMethod() {
-        return new SimulatedAnnealing();
+        return new GeneticAlgorithm();
     }
 
     public static void main(String[] args) throws Exception {
