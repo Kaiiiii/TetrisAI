@@ -1,7 +1,6 @@
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.Scanner;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -11,7 +10,7 @@ import java.util.stream.IntStream;
 public class ParticleSwarmOptimisation implements LearningMethod {
     private static final int PARTICLE_BENCHMARKS = 1;
     private static final int PARTICLE_COUNT = 40;
-    private static final int GENERATIONS = 1000;
+    private static final int GENERATIONS = 100;
     private static final double LEARNING_FACTOR_1 = 2;
     private static final double LEARNING_FACTOR_2 = LEARNING_FACTOR_1;
 
@@ -26,7 +25,6 @@ public class ParticleSwarmOptimisation implements LearningMethod {
         // Prepare values
         Particle bestParticle = null;
         List<Particle> swarm = generateParticleSwarm();
-        Scanner sc = new Scanner(System.in);
 
         for (int i = 0; i < GENERATIONS; i++) {
             final Particle localBestParticle = swarm.parallelStream()
@@ -37,17 +35,13 @@ public class ParticleSwarmOptimisation implements LearningMethod {
             }
 
             final double globalBest = localBestParticle.getPerformance();
-            System.out.printf("%d\tFound gBest at [%s] with value %.0f\n",
+            System.out.printf("%d\tFound gBest at [%s] with value %.7f\n",
                     i,
                     localBestParticle,
                     globalBest);
 
             swarm.parallelStream().forEach(particle -> {
                 particle.updateVelocity(globalBest);
-                System.out.printf("Particle [%s] tending towards [%s] with velocity %.4f\n",
-                        particle,
-                        localBestParticle,
-                        particle.getVelocity());
                 particle.updateValues(localBestParticle);
             });
 
@@ -94,9 +88,9 @@ public class ParticleSwarmOptimisation implements LearningMethod {
         }
 
         public void updateVelocity(double globalBest) {
-            this._velocity = this.getVelocity() + LEARNING_FACTOR_1 * _randomizer.nextDouble() *
-                    (this.getBestPerformance() - this.getPerformance()) + LEARNING_FACTOR_2 *
-                    _randomizer.nextDouble() * (globalBest - this.getPerformance());
+            this._velocity = LEARNING_FACTOR_1 * _randomizer.nextDouble() *
+                    (this.getBestPerformance() - this.getPerformance()) / globalBest + LEARNING_FACTOR_2 *
+                    _randomizer.nextDouble() * (globalBest - this.getPerformance()) / globalBest;
         }
 
         @Override
@@ -111,11 +105,13 @@ public class ParticleSwarmOptimisation implements LearningMethod {
             double vectorLength = Math.sqrt(Arrays.stream(distanceVector)
                     .map(value -> value * value) // Square
                     .sum());
-            double[] unitVector = Arrays.stream(distanceVector)
-                    .map(value -> value / vectorLength)
-                    .toArray();
-            double[] travel = Arrays.stream(unitVector)
-                    .map(value -> value * this.getVelocity())
+            if (((Double) 0.0).compareTo(vectorLength) == 0) {
+                vectorLength = 1;
+            }
+
+            final double vl = vectorLength;
+            double[] travel = Arrays.stream(distanceVector)
+                    .map(value -> value * this.getVelocity() / vl)
                     .toArray();
 
             double[] newValues = IntStream.range(0, COUNT)
@@ -127,4 +123,15 @@ public class ParticleSwarmOptimisation implements LearningMethod {
         }
 
     }
+
+    private static double limit(double value, double min, double max) {
+        if (value < min) {
+            return min;
+        }
+        if (value > max) {
+            return max;
+        }
+        return value;
+    }
+
 }
