@@ -37,12 +37,7 @@ public class Benchmarker {
 
     public static void main(String[] args) {
         Heuristics h = new Heuristics(
-                5.500158825082766,
-                3.4181268101392694,
-                3.2178882868487753,
-                9.348695305445199,
-                10.899265427351652,
-                3.3855972247263626
+                4.0156, 1.0492, 1.8919, 8.2205, 8.9781, 2.2942
         );
         System.out.println(new Benchmarker(h).benchmark(10));
     }

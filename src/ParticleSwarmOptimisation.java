@@ -9,7 +9,7 @@ import java.util.stream.IntStream;
  */
 public class ParticleSwarmOptimisation implements LearningMethod {
     private static final int PARTICLE_BENCHMARKS = 1;
-    private static final int PARTICLE_COUNT = 40;
+    private static final int PARTICLE_COUNT = 30;
     private static final int GENERATIONS = 100;
     private static final double LEARNING_FACTOR_1 = 2;
     private static final double LEARNING_FACTOR_2 = LEARNING_FACTOR_1;
@@ -45,10 +45,14 @@ public class ParticleSwarmOptimisation implements LearningMethod {
                 particle.updateValues(localBestParticle);
             });
 
-            bestParticle = localBestParticle;
+            if (bestParticle == null || bestParticle.getBestPerformance() < globalBest) {
+                bestParticle = localBestParticle;
+            }
         }
 
-        return new Heuristics(bestParticle.getValues());
+        return swarm.parallelStream()
+                .max((p1, p2) -> p1.getBestPerformance().compareTo(p2.getBestPerformance()))
+                .orElse(null);
     }
 
     public List<Particle> generateParticleSwarm() {
