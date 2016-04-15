@@ -23,7 +23,6 @@ public class ParticleSwarmOptimisation implements LearningMethod {
     @Override
     public Heuristics learn() {
         // Prepare values
-        Particle bestParticle = null;
         List<Particle> swarm = generateParticleSwarm();
 
         for (int i = 0; i < GENERATIONS; i++) {
@@ -35,24 +34,22 @@ public class ParticleSwarmOptimisation implements LearningMethod {
             }
 
             final double globalBest = localBestParticle.getPerformance();
-            System.out.printf("%d\tFound gBest at [%s] with value %.7f\n",
+            System.out.printf("%d\tFound gBest at [%s] with value %.0f\n",
                     i,
-                    localBestParticle,
+                    localBestParticle.fullString(),
                     globalBest);
 
             swarm.parallelStream().forEach(particle -> {
                 particle.updateVelocity(globalBest);
                 particle.updateValues(localBestParticle);
             });
-
-            if (bestParticle == null || bestParticle.getBestPerformance() < globalBest) {
-                bestParticle = localBestParticle;
-            }
         }
 
-        return swarm.parallelStream()
+        Particle bestParticle = swarm.parallelStream()
                 .max((p1, p2) -> p1.getBestPerformance().compareTo(p2.getBestPerformance()))
                 .orElse(null);
+        if (bestParticle == null) return null;
+        return new Heuristics(bestParticle.getBestValues());
     }
 
     public List<Particle> generateParticleSwarm() {
@@ -67,6 +64,7 @@ public class ParticleSwarmOptimisation implements LearningMethod {
         private Double _performance;
         private Double _bestPerformance;
         private Double _velocity;
+        private double[] _bestPerformanceValues;
 
         public Particle(double... heuristics) {
             super(heuristics);
@@ -79,12 +77,18 @@ public class ParticleSwarmOptimisation implements LearningMethod {
             }
             if (this._bestPerformance == null || this._bestPerformance.compareTo(this._performance) < 0) {
                 this._bestPerformance = this._performance;
+                this._bestPerformanceValues = new double[COUNT];
+                System.arraycopy(this.getValues(), 0, this._bestPerformanceValues, 0, COUNT);
             }
             return this._performance;
         }
 
         public Double getBestPerformance() {
             return this._bestPerformance;
+        }
+
+        public double[] getBestValues() {
+            return this._bestPerformanceValues;
         }
 
         public double getVelocity() {
@@ -120,6 +124,7 @@ public class ParticleSwarmOptimisation implements LearningMethod {
 
             double[] newValues = IntStream.range(0, COUNT)
                     .mapToDouble(index -> this.getValues()[index] + travel[index])
+                    .map(value -> limit(value, LOWER_BOUND, UPPER_BOUND))
                     .toArray();
             this.setValues(newValues);
             // Prepare for new generation
