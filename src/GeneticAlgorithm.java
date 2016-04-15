@@ -1,7 +1,7 @@
 
 import java.util.Random;
 
-/*  
+/*
  * Created by maianhvu on 28/03/2016.
  */
 
@@ -14,6 +14,7 @@ public class GeneticAlgorithm implements LearningMethod {
     private static Random randomizer = new Random();
 
     public int GENERATION_CUTOFF = 100;
+    public double MUTATION_RATE = 0.1;
 
     public Heuristics learn(){
         return genetic();
@@ -23,7 +24,7 @@ public class GeneticAlgorithm implements LearningMethod {
         //Initialising a new population
         Heuristics[] population = new Heuristics[POPULATION_SIZE], nextPop = new Heuristics[POPULATION_SIZE];
         int totalScore = 0, prevScore = 0;
-        double currScore = 0, bestScore = 0;
+        double[] popScore = new double[POPULATION_SIZE];
 
         for (int i = 0; i < POPULATION_SIZE; i++) {
             population[i] = Heuristics.randomHeuristics();
@@ -31,20 +32,22 @@ public class GeneticAlgorithm implements LearningMethod {
 
         Heuristics bestState = population[0];
         Heuristics[] parents = new Heuristics[2];
-        bestScore = new Benchmarker(population[0]).benchmark(1);
+        double bestScore = new Benchmarker(population[0]).benchmark(1);
+
         for (int k = 0; k<GENERATION_CUTOFF; k++) {
             prevScore = totalScore;
             totalScore = 0;
             //Printing Population scores
             System.out.print("Population Scores: [");
             for (int i = 0; i < POPULATION_SIZE; i++) {
-                currScore = new Benchmarker(population[i]).benchmark(1);
-                System.out.print(currScore);
-                if (currScore>bestScore) {
+                popScore[i] = new Benchmarker(population[i]).benchmark(1);
+                System.out.print(popScore[i]);
+                if (popScore[i]>bestScore) {
+                    //System.out.println(population[i].toString());
                     bestState = population[i];
-                    bestScore = currScore;
+                    bestScore = popScore[i];
                 }
-                totalScore += currScore;
+                totalScore += popScore[i];
                 if (i == POPULATION_SIZE - 1) break;
                 System.out.print(", ");
             }
@@ -53,39 +56,33 @@ public class GeneticAlgorithm implements LearningMethod {
             System.out.println("Average Population Score: " + totalScore/POPULATION_SIZE);
 
             //Printing best player
-            System.out.print("Best Player: [");
-            for (int i = 0; i<HEURISTIC_COUNT; i++){
-                System.out.print(bestState.getValues()[i]);
-                if (i == HEURISTIC_COUNT-1) break;
-                System.out.print(", ");
-            }
-            System.out.println("]");
+            System.out.print("Best Player: [" + bestState.toString());
+            System.out.println("], Score: " + bestScore);
 
             double[] parentScore = new double[2];
             for (int j = 0; j<POPULATION_SIZE; j++) {
                 parents[0] = population[0];
                 parents[1] = population[1];
 
-                parentScore[0] = new Benchmarker(parents[0]).benchmark(1);
-                parentScore[1] = new Benchmarker(parents[1]).benchmark(1);
+                parentScore[0] = popScore[0];
+                parentScore[1] = popScore[1];
                 for (int i = 2; i < POPULATION_SIZE; i++) {
                     if (parentScore[1]> parentScore[0])
                         swap(parents, parentScore);
-                    currScore = new Benchmarker(population[i]).benchmark(1);
-                    if (randomizer.nextDouble() * currScore > randomizer.nextDouble() * parentScore[0]) {
+                    if (randomizer.nextDouble() * popScore[i] > randomizer.nextDouble() * parentScore[0]) {
                         parents[0] = population[i];
-                        parentScore[0] = currScore;
+                        parentScore[0] = popScore[i];
                     }
-                    else if (randomizer.nextDouble() * currScore > randomizer.nextDouble() * parentScore[1]) {
+                    else if (randomizer.nextDouble() * popScore[i]> randomizer.nextDouble() * parentScore[1]) {
                         parents[1] = population[i];
-                        parentScore[1] = currScore;
+                        parentScore[1] = popScore[i];
                     }
                 }
                 nextPop[j] = nextGeneration(parents, parentScore, prevScore, totalScore);
             }
             population = nextPop;
+            System.out.println();
         }
-
         return bestState;
     }
 
@@ -97,8 +94,8 @@ public class GeneticAlgorithm implements LearningMethod {
             if (parentScore[0] * randomizer.nextDouble() >= parentScore[1] * randomizer.nextDouble()) {
                 heuristic[i] = parents[0].getValues()[i];
             } else heuristic[i] = parents[1].getValues()[i];
-            if (randomizer.nextDouble()<(randomizer.nextDouble()*prev/curr)) {
-                heuristic[i] = heuristic[i] + randomizer.nextInt(100) - randomizer.nextInt(100);
+            if (randomizer.nextDouble()*(prev/curr)>MUTATION_RATE) {
+                heuristic[i] = heuristic[i] + randomizer.nextDouble() - randomizer.nextDouble();
             }
             if (heuristic[i] < LOWER) heuristic[i] = LOWER;
             else if (heuristic[i] > UPPER) heuristic[i] = UPPER;
