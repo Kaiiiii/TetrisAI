@@ -4,7 +4,13 @@ public class PlayerSkeleton {
 
     private static final int DELAY_PLACE = 1;
     private static final Heuristics HEURISTICS_DEFAULT = new Heuristics(
-            3.6015, 2.4525, 2.7295, 8.4978, 9.1914, 2.6200
+            5.0396, 7.8506, 3.0869, 8.4675, 9.9957, 2.4788
+//            4.500158825082766,
+//            3.4181268101392694,
+//            3.2178882868487753,
+//            9.348695305445199,
+//            7.899265427351652,
+//            3.3855972247263626
     );
 
     // implement this function to have a working system
@@ -34,6 +40,8 @@ public class PlayerSkeleton {
             }
         }
         System.out.println("You have completed " + s.getRowsCleared() + " rows.");
+//        double result = new Benchmarker(HEURISTICS_DEFAULT).benchmark(1000);
+//        System.out.println(result);
     }
 
 }
