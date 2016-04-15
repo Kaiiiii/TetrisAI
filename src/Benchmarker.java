@@ -37,11 +37,8 @@ public class Benchmarker {
 
     public static void main(String[] args) {
         Heuristics h = new Heuristics(
-                -0.025447084296227995, // Height
-                0.6576589572714789, // Rows cleared
-                -0.8390092702535551, // Holes
-                -0.1990402741152839 // Bumpiness
+                4.0156, 1.0492, 1.8919, 8.2205, 8.9781, 2.2942
         );
-        System.out.println(new Benchmarker(h).benchmark(1000));
+        System.out.println(new Benchmarker(h).benchmark(10));
     }
 }
